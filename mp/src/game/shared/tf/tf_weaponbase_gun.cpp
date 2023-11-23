@@ -408,7 +408,7 @@ CBaseEntity *CTFWeaponBaseGun::FirePipeBomb( CTFPlayer *pPlayer, bool bRemoteDet
 	Vector vecSrc = pPlayer->Weapon_ShootPosition();
 	vecSrc +=  vecForward * 36.0f + vecRight * 8.0f + vecUp * -6.0f;
 	
-	Vector vecVelocity = ( vecForward * GetProjectileSpeed() ) + ( vecUp * 200.0f ) + ( random->RandomFloat( -10.0f, 10.0f ) * vecRight ) +		
+	Vector vecVelocity = ( vecForward * GetProjectileSpeed() * 2 ) + ( vecUp * 200.0f ) + ( random->RandomFloat( -10.0f, 10.0f ) * vecRight ) +		
 		( random->RandomFloat( -10.0f, 10.0f ) * vecUp );
 
 	CTFGrenadePipebombProjectile *pProjectile = CTFGrenadePipebombProjectile::Create( vecSrc, pPlayer->EyeAngles(), vecVelocity, 
