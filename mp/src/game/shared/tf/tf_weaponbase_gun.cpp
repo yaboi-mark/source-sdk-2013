@@ -176,7 +176,9 @@ CBaseEntity *CTFWeaponBaseGun::FireProjectile( CTFPlayer *pPlayer )
 		break;
 
 	case TF_PROJECTILE_PIPEBOMB:
-		pProjectile = FirePipeBomb( pPlayer, false );
+		for (int i = 0; i < 5; i++) { //note to self for later: investigate m_WeaponData[TF_WEAPON_PRIMARY_MODE].m_nBulletsPerShot
+			pProjectile = FirePipeBomb(pPlayer, false);
+		}
 		pPlayer->DoAnimationEvent( PLAYERANIMEVENT_ATTACK_PRIMARY );
 		break;
 
@@ -404,7 +406,7 @@ CBaseEntity *CTFWeaponBaseGun::FirePipeBomb( CTFPlayer *pPlayer, bool bRemoteDet
 
 	// Create grenades here!!
 	Vector vecSrc = pPlayer->Weapon_ShootPosition();
-	vecSrc +=  vecForward * 16.0f + vecRight * 8.0f + vecUp * -6.0f;
+	vecSrc +=  vecForward * 36.0f + vecRight * 8.0f + vecUp * -6.0f;
 	
 	Vector vecVelocity = ( vecForward * GetProjectileSpeed() ) + ( vecUp * 200.0f ) + ( random->RandomFloat( -10.0f, 10.0f ) * vecRight ) +		
 		( random->RandomFloat( -10.0f, 10.0f ) * vecUp );

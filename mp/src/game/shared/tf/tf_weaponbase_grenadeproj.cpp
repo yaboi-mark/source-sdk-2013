@@ -37,8 +37,8 @@ BEGIN_DATADESC( CTFWeaponBaseGrenadeProj )
 DEFINE_THINKFUNC( DetonateThink ),
 END_DATADESC()
 
-ConVar tf_grenade_show_radius( "tf_grenade_show_radius", "0", FCVAR_CHEAT | FCVAR_DEVELOPMENTONLY, "Render radius of grenades" );
-ConVar tf_grenade_show_radius_time( "tf_grenade_show_radius_time", "5.0", FCVAR_CHEAT | FCVAR_DEVELOPMENTONLY, "Time to show grenade radius" );
+ConVar tf_grenade_show_radius( "tf_grenade_show_radius", "0", FCVAR_CHEAT, "Render radius of grenades" );
+ConVar tf_grenade_show_radius_time( "tf_grenade_show_radius_time", "5.0", FCVAR_CHEAT, "Time to show grenade radius" );
 extern void SendProxy_Origin( const SendProp *pProp, const void *pStruct, const void *pData, DVariant *pOut, int iElement, int objectID );
 extern void SendProxy_Angles( const SendProp *pProp, const void *pStruct, const void *pData, DVariant *pOut, int iElement, int objectID );
 
@@ -478,7 +478,7 @@ void CTFWeaponBaseGrenadeProj::ResolveFlyCollisionCustom( trace_t &trace, Vector
 			VectorAngles( trace.plane.normal, angle );
 
 			// rotate randomly in yaw
-			angle[1] = random->RandomFloat( 0, 360 );
+			angle[1] = random->RandomFloat( 0, 0 );
 
 			// TFTODO: rotate around trace.plane.normal
 

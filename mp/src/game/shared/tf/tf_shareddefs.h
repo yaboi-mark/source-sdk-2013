@@ -624,14 +624,14 @@ enum
 // TF Objects Info
 //-----------------
 
-#define SENTRYGUN_UPGRADE_COST			130
+#define SENTRYGUN_UPGRADE_COST			50
 #define SENTRYGUN_UPGRADE_METAL			200
 #define SENTRYGUN_EYE_OFFSET_LEVEL_1	Vector( 0, 0, 32 )
 #define SENTRYGUN_EYE_OFFSET_LEVEL_2	Vector( 0, 0, 40 )
 #define SENTRYGUN_EYE_OFFSET_LEVEL_3	Vector( 0, 0, 46 )
-#define SENTRYGUN_MAX_SHELLS_1			100
-#define SENTRYGUN_MAX_SHELLS_2			120
-#define SENTRYGUN_MAX_SHELLS_3			144
+#define SENTRYGUN_MAX_SHELLS_1			150
+#define SENTRYGUN_MAX_SHELLS_2			150
+#define SENTRYGUN_MAX_SHELLS_3			150
 #define SENTRYGUN_MAX_ROCKETS			20
 
 // Dispenser's maximum carrying capability

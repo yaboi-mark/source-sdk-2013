@@ -69,7 +69,7 @@ CTFRocketLauncher::~CTFRocketLauncher()
 void CTFRocketLauncher::Precache()
 {
 	BaseClass::Precache();
-	PrecacheParticleSystem( "rocketbackblast" );
+	//PrecacheParticleSystem( "rocketbackblast" );
 }
 #endif
 
@@ -162,7 +162,7 @@ void CTFRocketLauncher::CreateMuzzleFlashEffects( C_BaseEntity *pAttachEnt, int 
 	if ( pOwner->IsLocalPlayer() )
 		return;
 
-	ParticleProp()->Create( "rocketbackblast", PATTACH_POINT_FOLLOW, "backblast" );
+	//ParticleProp()->Create( "rocketbackblast", PATTACH_POINT_FOLLOW, "backblast" );
 }
 
 /*

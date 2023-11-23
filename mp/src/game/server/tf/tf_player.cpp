@@ -2595,6 +2595,11 @@ int CTFPlayer::OnTakeDamage( const CTakeDamageInfo &inputInfo )
 								// Scattergun gets 50% bonus of other weapons at short range
 								flRandomDamage *= 1.5;
 							}
+							else if (pWeapon->GetWeaponID() == TF_WEAPON_SHOTGUN_PRIMARY)
+							{
+								// Scattergun gets 50% bonus of other weapons at short range
+								flRandomDamage *= 1.5;
+							}
 						}
 					}
 				}

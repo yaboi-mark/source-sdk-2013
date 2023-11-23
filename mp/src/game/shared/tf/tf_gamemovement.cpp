@@ -29,14 +29,12 @@
 	#include "team.h"
 #endif
 
-ConVar	tf_maxspeed( "tf_maxspeed", "400", FCVAR_NOTIFY | FCVAR_REPLICATED | FCVAR_CHEAT  | FCVAR_DEVELOPMENTONLY);
-ConVar	tf_showspeed( "tf_showspeed", "0", FCVAR_REPLICATED | FCVAR_DEVELOPMENTONLY );
-ConVar	tf_avoidteammates( "tf_avoidteammates", "1", FCVAR_REPLICATED | FCVAR_CHEAT | FCVAR_DEVELOPMENTONLY );
+ConVar	tf_maxspeed( "tf_maxspeed", "69420", FCVAR_NOTIFY | FCVAR_REPLICATED | FCVAR_CHEAT);
+ConVar	tf_showspeed( "tf_showspeed", "0", FCVAR_REPLICATED);
+ConVar	tf_avoidteammates( "tf_avoidteammates", "1", FCVAR_REPLICATED | FCVAR_CHEAT);
 ConVar  tf_solidobjects( "tf_solidobjects", "1", FCVAR_REPLICATED | FCVAR_CHEAT | FCVAR_DEVELOPMENTONLY );
-ConVar	tf_clamp_back_speed( "tf_clamp_back_speed", "0.9", FCVAR_REPLICATED | FCVAR_DEVELOPMENTONLY );
-ConVar  tf_clamp_back_speed_min( "tf_clamp_back_speed_min", "100", FCVAR_REPLICATED | FCVAR_DEVELOPMENTONLY );
-
-#define TF_MAX_SPEED   400
+ConVar	tf_clamp_back_speed( "tf_clamp_back_speed", "1", FCVAR_REPLICATED);
+ConVar  tf_clamp_back_speed_min( "tf_clamp_back_speed_min", "0", FCVAR_REPLICATED);
 
 #define TF_WATERJUMP_FORWARD  30
 #define TF_WATERJUMP_UP       300
@@ -207,7 +205,7 @@ void CTFGameMovement::ProcessMovement( CBasePlayer *pBasePlayer, CMoveData *pMov
 	mv = pMove;
 
 	// The max speed is currently set to the scout - if this changes we need to change this!
-	mv->m_flMaxSpeed = TF_MAX_SPEED; /*tf_maxspeed.GetFloat();*/
+	mv->m_flMaxSpeed = tf_maxspeed.GetFloat();
 
 	// Run the command.
 	PlayerMove();
@@ -284,7 +282,7 @@ bool CTFGameMovement::CheckWaterJumpButton( void )
 void CTFGameMovement::AirDash( void )
 {
 	// Apply approx. the jump velocity added to an air dash.
-	Assert( sv_gravity.GetFloat() == 800.0f );
+	Assert( sv_gravity.GetFloat() == 600.0f );
 	float flDashZ = 268.3281572999747f;
 
 	// Get the wish direction.
@@ -294,6 +292,11 @@ void CTFGameMovement::AirDash( void )
 	vecRight.z = 0.0f;		
 	VectorNormalize( vecForward );
 	VectorNormalize( vecRight );
+
+	mv->m_vecVelocity.z *= tea_airdash_zvel_influence.GetFloat();
+
+	float preSpeed = VectorLength(mv->m_vecVelocity);
+
 
 	// Copy movement amounts
 	float flForwardMove = mv->m_flForwardMove;
@@ -305,7 +308,7 @@ void CTFGameMovement::AirDash( void )
 		                     0.0f );
 	
 	// Update the velocity on the scout.
-	mv->m_vecVelocity = vecWishDirection;
+	mv->m_vecVelocity = vecWishDirection / mv->m_flMaxSpeed * preSpeed;
 	mv->m_vecVelocity.z += flDashZ;
 
 	m_pTFPlayer->m_Shared.SetAirDash( true );
@@ -314,13 +317,10 @@ void CTFGameMovement::AirDash( void )
 	m_pTFPlayer->DoAnimationEvent( PLAYERANIMEVENT_DOUBLEJUMP );
 }
 
-// Only allow bunny jumping up to 1.2x server / player maxspeed setting
-#define BUNNYJUMP_MAX_SPEED_FACTOR 1.2f
-
 void CTFGameMovement::PreventBunnyJumping()
 {
 	// Speed at which bunny jumping is limited
-	float maxscaledspeed = BUNNYJUMP_MAX_SPEED_FACTOR * player->m_flMaxspeed;
+	float maxscaledspeed = tea_bhop_dampen_start.GetFloat() * player->m_flMaxspeed;
 	if ( maxscaledspeed <= 0.0f )
 		return;
 
@@ -330,7 +330,7 @@ void CTFGameMovement::PreventBunnyJumping()
 		return;
 
 	// Apply this cropping fraction to velocity
-	float fraction = ( maxscaledspeed / spd );
+	float fraction = (((1 - (maxscaledspeed / spd)) * -tea_bhop_dampen_severity.GetFloat()) + 1);
 
 
 	mv->m_vecVelocity *= fraction;
@@ -338,7 +338,7 @@ void CTFGameMovement::PreventBunnyJumping()
 
 bool CTFGameMovement::CheckJumpButton()
 {
-	// Are we dead?  Then we cannot jump.
+	// Are we dead?  Then we cannot jump. Dumbass.
 	if ( player->pl.deadflag )
 		return false;
 
@@ -347,36 +347,43 @@ bool CTFGameMovement::CheckJumpButton()
 		return false;
 
 	// Cannot jump while taunting
-	if ( m_pTFPlayer->m_Shared.InCond( TF_COND_TAUNTING ) )
-		return false;
+	//if ( m_pTFPlayer->m_Shared.InCond( TF_COND_TAUNTING ) )
+	//	return false;
 
 	// Check to see if the player is a scout.
-	bool bScout = m_pTFPlayer->GetPlayerClass()->IsClass( TF_CLASS_SCOUT );
+	//bool bScout = m_pTFPlayer->GetPlayerClass()->IsClass( TF_CLASS_SCOUT );
 	bool bAirDash = false;
 	bool bOnGround = ( player->GetGroundEntity() != NULL );
 
-	// Cannot jump will ducked.
-	if ( player->GetFlags() & FL_DUCKING )
+	// Cannot jump will ducked. //bro type owed
+	/*if ( player->GetFlags() & FL_DUCKING )
 	{
 		// Let a scout do it.
 		bool bAllow = ( bScout && !bOnGround );
 
 		if ( !bAllow )
 			return false;
-	}
+	}*/
 
 	// Cannot jump while in the unduck transition.
 	if ( ( player->m_Local.m_bDucking && (  player->GetFlags() & FL_DUCKING ) ) || ( player->m_Local.m_flDuckJumpTime > 0.0f ) )
 		return false;
 
-	// Cannot jump again until the jump button has been released.
-	if ( mv->m_nOldButtons & IN_JUMP )
-		return false;
+	// Cannot jump again until the jump button has been released. // I HAVE COMMENTED THIS OUT SO WE CAN BHOP
+	//if ( mv->m_nOldButtons & IN_JUMP )
+	//	return false;
 
 	// In air, so ignore jumps (unless you are a scout).
-	if ( !bOnGround )
+	if ( !bOnGround)
 	{
-		if ( bScout && !m_pTFPlayer->m_Shared.IsAirDashing() )
+
+		if ( mv->m_nOldButtons & IN_JUMP ) // disables double jumping while normal jumping
+			return false;
+
+		if (player->GetFlags() & FL_DUCKING) // disables double jumping while crouching
+			return false;
+
+		if ( !m_pTFPlayer->m_Shared.IsAirDashing() ) // the check for if you were a scout was in this line. the bScout variable i commented out.
 		{
 			bAirDash = true;
 		}
@@ -412,7 +419,7 @@ bool CTFGameMovement::CheckJumpButton()
 	}
 
 	// fMul = sqrt( 2.0 * gravity * jump_height (21.0units) ) * GroundFactor
-	Assert( sv_gravity.GetFloat() == 800.0f );
+	Assert( sv_gravity.GetFloat() == 600.0f );
 	float flMul = 268.3281572999747f * flGroundFactor;
 
 	// Save the current z velocity.
@@ -812,7 +819,6 @@ void CTFGameMovement::WalkMove( void )
 	// NOTE YWB 7/5/07: Don't do this here, our version of CategorizePosition encompasses this test
 	// StayOnGround();
 
-#if 0
 	// Debugging!!!
 	Vector vecTestVelocity = mv->m_vecVelocity;
 	vecTestVelocity.z = 0.0f;
@@ -827,7 +833,6 @@ void CTFGameMovement::WalkMove( void )
 		Msg( "Speed=%f\n", flTestSpeed );
 	}
 
-#endif
 }
 
 //-----------------------------------------------------------------------------

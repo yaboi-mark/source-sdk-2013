@@ -50,4 +50,10 @@ extern ConVar r_AirboatViewDampenFreq;
 extern ConVar r_AirboatViewDampenDamp;
 extern ConVar r_AirboatViewZHeight;
 
+// tea for two convars
+
+extern ConVar tea_bhop_dampen_start;
+extern ConVar tea_bhop_dampen_severity;
+extern ConVar tea_airdash_zvel_influence;
+
 #endif // MOVEVARS_SHARED_H

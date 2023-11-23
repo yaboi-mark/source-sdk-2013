@@ -32,10 +32,10 @@ extern bool IsInCommentaryMode();
 
 #define SENTRY_ROCKET_MODEL "models/buildables/sentry3_rockets.mdl"
 
-#define SENTRYGUN_MINS			Vector(-20, -20, 0)
-#define SENTRYGUN_MAXS			Vector( 20,  20, 66)
+#define SENTRYGUN_MINS			Vector(-12, -12, 0)
+#define SENTRYGUN_MAXS			Vector( 12,  12, 66)
 
-#define SENTRYGUN_MAX_HEALTH	150
+#define SENTRYGUN_MAX_HEALTH	120
 
 #define SENTRYGUN_ADD_SHELLS	40
 #define SENTRYGUN_ADD_ROCKETS	8
@@ -111,13 +111,13 @@ END_DATADESC()
 LINK_ENTITY_TO_CLASS(obj_sentrygun, CObjectSentrygun);
 PRECACHE_REGISTER(obj_sentrygun);
 
-ConVar tf_sentrygun_damage( "tf_sentrygun_damage", "16", FCVAR_CHEAT | FCVAR_DEVELOPMENTONLY );
-ConVar tf_sentrygun_ammocheat( "tf_sentrygun_ammocheat", "0", FCVAR_CHEAT | FCVAR_DEVELOPMENTONLY );
-ConVar tf_sentrygun_upgrade_per_hit( "tf_sentrygun_upgrade_per_hit", "25", FCVAR_CHEAT | FCVAR_DEVELOPMENTONLY );
-ConVar tf_sentrygun_newtarget_dist( "tf_sentrygun_newtarget_dist", "200", FCVAR_CHEAT | FCVAR_DEVELOPMENTONLY );
-ConVar tf_sentrygun_metal_per_shell( "tf_sentrygun_metal_per_shell", "1", FCVAR_CHEAT | FCVAR_DEVELOPMENTONLY );
-ConVar tf_sentrygun_metal_per_rocket( "tf_sentrygun_metal_per_rocket", "2", FCVAR_CHEAT | FCVAR_DEVELOPMENTONLY );
-ConVar tf_sentrygun_notarget( "tf_sentrygun_notarget", "0", FCVAR_CHEAT | FCVAR_DEVELOPMENTONLY );
+ConVar tf_sentrygun_damage( "tf_sentrygun_damage", "7", FCVAR_CHEAT );
+ConVar tf_sentrygun_ammocheat( "tf_sentrygun_ammocheat", "0", FCVAR_CHEAT );
+ConVar tf_sentrygun_upgrade_per_hit( "tf_sentrygun_upgrade_per_hit", "0", FCVAR_CHEAT );
+ConVar tf_sentrygun_newtarget_dist( "tf_sentrygun_newtarget_dist", "200", FCVAR_CHEAT );
+ConVar tf_sentrygun_metal_per_shell( "tf_sentrygun_metal_per_shell", "1", FCVAR_CHEAT );
+ConVar tf_sentrygun_metal_per_rocket( "tf_sentrygun_metal_per_rocket", "2", FCVAR_CHEAT );
+ConVar tf_sentrygun_notarget( "tf_sentrygun_notarget", "0", FCVAR_CHEAT );
 
 extern ConVar tf_cheapobjects;
 
@@ -153,7 +153,7 @@ void CObjectSentrygun::Spawn()
 	// Rotate Details
 	m_iRightBound = 45;
 	m_iLeftBound = 315;
-	m_iBaseTurnRate = 6;
+	m_iBaseTurnRate = 12;
 	m_flFieldOfView = VIEW_FIELD_NARROW;
 
 	// Give the Gun some ammo
@@ -345,7 +345,7 @@ void CObjectSentrygun::Precache()
 //-----------------------------------------------------------------------------
 bool CObjectSentrygun::CanBeUpgraded( CTFPlayer *pPlayer )
 {
-	// Already upgrading
+	/*// Already upgrading
 	if ( m_iState == SENTRY_STATE_UPGRADING )
 	{
 		return false;
@@ -361,7 +361,7 @@ bool CObjectSentrygun::CanBeUpgraded( CTFPlayer *pPlayer )
 	if ( m_iUpgradeLevel >= 3 )
 	{
 		return false;
-	}
+	}*/ // commented out this section. bwahahahaha- you cannot upgrade the sentry!!!
 
 	return true;
 }
@@ -466,7 +466,7 @@ bool CObjectSentrygun::IsUpgrading( void ) const
 //-----------------------------------------------------------------------------
 bool CObjectSentrygun::OnWrenchHit( CTFPlayer *pPlayer )
 {
-	bool bDidWork = false;
+	/*bool bDidWork = false;
 
 	// If the player repairs it at all, we're done
 	if ( GetHealth() < GetMaxHealth() )
@@ -535,7 +535,7 @@ bool CObjectSentrygun::OnWrenchHit( CTFPlayer *pPlayer )
 		// One rocket per two ammo
 		iPlayerMetal = pPlayer->GetAmmoCount( TF_AMMO_METAL );
 
-		if ( m_iAmmoRockets < m_iMaxAmmoRockets && m_iUpgradeLevel == 3 && iPlayerMetal > 0  )
+		if ( m_iAmmoRockets < m_iMaxAmmoRockets && iPlayerMetal > 0  )
 		{
 			int iMaxRocketsPlayerCanAfford = (int)( (float)iPlayerMetal / tf_sentrygun_metal_per_rocket.GetFloat() );
 
@@ -550,9 +550,9 @@ bool CObjectSentrygun::OnWrenchHit( CTFPlayer *pPlayer )
 				bDidWork = true;
 			}
 		}
-	}
+	}*/
 
-	return bDidWork;
+	return false;
 }
 
 //-----------------------------------------------------------------------------
@@ -574,12 +574,9 @@ int CObjectSentrygun::DrawDebugTextOverlays(void)
 		EntityText(text_offset,tempstr,0);
 		text_offset++;
 
-		if ( m_iUpgradeLevel == 3 )
-		{
-			Q_snprintf( tempstr, sizeof( tempstr ), "Rockets: %d / %d", m_iAmmoRockets.Get(), m_iMaxAmmoRockets.Get() );
-			EntityText(text_offset,tempstr,0);
-			text_offset++;
-		}
+		Q_snprintf( tempstr, sizeof( tempstr ), "Rockets: %d / %d", m_iAmmoRockets.Get(), m_iMaxAmmoRockets.Get() );
+		EntityText(text_offset,tempstr,0);
+		text_offset++;
 
 		Q_snprintf( tempstr, sizeof( tempstr ), "Upgrade metal %d", m_iUpgradeMetal.Get() );
 		EntityText(text_offset,tempstr,0);
@@ -796,7 +793,7 @@ void CObjectSentrygun::FoundTarget( CBaseEntity *pTarget, const Vector &vecSound
 {
 	m_hEnemy = pTarget;
 
-	if ( ( m_iAmmoShells > 0 ) || ( m_iAmmoRockets > 0 && m_iUpgradeLevel == 3 ) )
+	if ( ( m_iAmmoShells > 0 ) || ( m_iAmmoRockets > 0) )
 	{
 		// Play one sound to everyone but the target.
 		CPASFilter filter( vecSoundCenter );
@@ -892,15 +889,15 @@ void CObjectSentrygun::Attack()
 	{
 		Fire();
 
-		if ( m_iUpgradeLevel == 1 )
+		/*if ( m_iUpgradeLevel == 1 )
 		{
-			// Level 1 sentries fire slower
+			// Level 1 sentries fire slower // no they dont
 			m_flNextAttack = gpGlobals->curtime + 0.2;
 		}
 		else
-		{
+		{*/
 			m_flNextAttack = gpGlobals->curtime + 0.1;
-		}
+		//}
 	}
 	else
 	{
@@ -918,8 +915,7 @@ bool CObjectSentrygun::Fire()
 	Vector vecAimDir;
 
 	// Level 3 Turrets fire rockets every 3 seconds
-	if ( m_iUpgradeLevel == 3 &&
-		m_iAmmoRockets > 0 &&
+	if ( m_iAmmoRockets > 0 &&
 		m_flNextRocketAttack < gpGlobals->curtime )
 	{
 		Vector vecSrc;

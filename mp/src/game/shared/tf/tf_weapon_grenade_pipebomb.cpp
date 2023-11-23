@@ -33,11 +33,11 @@
 #define TF_WEAPON_PIPEBOMB_FRICTION		0.8f
 #define TF_WEAPON_PIPEBOMB_ELASTICITY	0.45f
 
-#define TF_WEAPON_PIPEBOMB_TIMER_DMG_REDUCTION		0.6
+#define TF_WEAPON_PIPEBOMB_TIMER_DMG_REDUCTION		1
 
 extern ConVar tf_grenadelauncher_max_chargetime;
-ConVar tf_grenadelauncher_chargescale( "tf_grenadelauncher_chargescale", "1.0", FCVAR_CHEAT | FCVAR_REPLICATED | FCVAR_DEVELOPMENTONLY );
-ConVar tf_grenadelauncher_livetime( "tf_grenadelauncher_livetime", "0.8", FCVAR_CHEAT | FCVAR_REPLICATED | FCVAR_DEVELOPMENTONLY );
+ConVar tf_grenadelauncher_chargescale( "tf_grenadelauncher_chargescale", "1.0", FCVAR_CHEAT | FCVAR_REPLICATED);
+ConVar tf_grenadelauncher_livetime( "tf_grenadelauncher_livetime", "0.8", FCVAR_CHEAT | FCVAR_REPLICATED);
 
 #ifndef CLIENT_DLL
 ConVar tf_grenadelauncher_min_contact_speed( "tf_grenadelauncher_min_contact_speed", "100", FCVAR_DEVELOPMENTONLY );
@@ -290,7 +290,11 @@ CTFGrenadePipebombProjectile* CTFGrenadePipebombProjectile::Create( const Vector
 		pGrenade->SetPipebombMode( bRemoteDetonate );
 		DispatchSpawn( pGrenade );
 
-		pGrenade->InitGrenade( velocity, angVelocity, pOwner, weaponInfo );
+		int flSpread = 100;
+		
+		Vector randomSpread (RandomFloat( -flSpread, flSpread ),RandomFloat( -flSpread, flSpread ),RandomFloat( -flSpread, flSpread ));
+
+		pGrenade->InitGrenade( velocity + randomSpread, angVelocity, pOwner, weaponInfo );
 
 #ifdef _X360 
 		if ( pGrenade->m_iType != TF_GL_MODE_REMOTE_DETONATE )
@@ -376,6 +380,7 @@ void CTFGrenadePipebombProjectile::SetPipebombMode( bool bRemoteDetonate )
 void CTFGrenadePipebombProjectile::BounceSound( void )
 {
 	EmitSound( TF_WEAPON_PIPEBOMB_BOUNCE_SOUND );
+	Detonate();
 }
 
 //-----------------------------------------------------------------------------
@@ -483,6 +488,8 @@ void CTFGrenadePipebombProjectile::VPhysicsCollision( int index, gamevcollisione
 			SetThink( &CTFGrenadePipebombProjectile::Detonate );
 			SetNextThink( gpGlobals->curtime );
 		}
+		SetThink( &CTFGrenadePipebombProjectile::Detonate );
+		SetNextThink( gpGlobals->curtime );
 		
 		m_bTouched = true;
 		return;
@@ -513,11 +520,11 @@ void CTFGrenadePipebombProjectile::VPhysicsCollision( int index, gamevcollisione
 	}
 }
 
-ConVar tf_grenade_forcefrom_bullet( "tf_grenade_forcefrom_bullet", "0.8", FCVAR_CHEAT | FCVAR_DEVELOPMENTONLY );
-ConVar tf_grenade_forcefrom_buckshot( "tf_grenade_forcefrom_buckshot", "0.5", FCVAR_CHEAT | FCVAR_DEVELOPMENTONLY );
-ConVar tf_grenade_forcefrom_blast( "tf_grenade_forcefrom_blast", "0.08", FCVAR_CHEAT | FCVAR_DEVELOPMENTONLY );
-ConVar tf_grenade_force_sleeptime( "tf_grenade_force_sleeptime", "1.0", FCVAR_CHEAT | FCVAR_DEVELOPMENTONLY );	// How long after being shot will we re-stick to the world.
-ConVar tf_pipebomb_force_to_move( "tf_pipebomb_force_to_move", "1500.0", FCVAR_CHEAT | FCVAR_DEVELOPMENTONLY );
+ConVar tf_grenade_forcefrom_bullet( "tf_grenade_forcefrom_bullet", "0.8", FCVAR_CHEAT);
+ConVar tf_grenade_forcefrom_buckshot( "tf_grenade_forcefrom_buckshot", "0.5", FCVAR_CHEAT);
+ConVar tf_grenade_forcefrom_blast( "tf_grenade_forcefrom_blast", "0.08", FCVAR_CHEAT);
+ConVar tf_grenade_force_sleeptime( "tf_grenade_force_sleeptime", "1.0", FCVAR_CHEAT);	// How long after being shot will we re-stick to the world.
+ConVar tf_pipebomb_force_to_move( "tf_pipebomb_force_to_move", "1500.0", FCVAR_CHEAT);
 
 //-----------------------------------------------------------------------------
 // Purpose: If we are shot after being stuck to the world, move a bit
