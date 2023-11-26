@@ -1704,7 +1704,7 @@ void CGameMovement::FinishGravity( void )
 // Input  : wishdir - 
 //			accel - 
 //-----------------------------------------------------------------------------
-void CGameMovement::AirAccelerate( Vector& wishdir, float wishspeed, float accel )
+void CGameMovement::AirAccelerate( Vector& wishdir, float wishspeed, float accel, float maxSpeed )
 {
 	int i;
 	float addspeed, accelspeed, currentspeed;
@@ -1719,8 +1719,8 @@ void CGameMovement::AirAccelerate( Vector& wishdir, float wishspeed, float accel
 		return;
 
 	// Cap speed
-	if ( wishspd > GetAirSpeedCap() )
-		wishspd = GetAirSpeedCap();
+	if ( wishspd > maxSpeed )
+		wishspd = maxSpeed;
 
 	// Determine veer amount
 	currentspeed = mv->m_vecVelocity.Dot(wishdir);
@@ -1786,11 +1786,12 @@ void CGameMovement::AirMove( void )
 		VectorScale (wishvel, mv->m_flMaxSpeed/wishspeed, wishvel);
 		wishspeed = mv->m_flMaxSpeed;
 	}
-	
-	AirAccelerate( wishdir, wishspeed, sv_airaccelerate.GetFloat() );
+
+	if (tea_movementmode.GetInt() == 1 || tea_movementmode.GetInt() == 2) AirAccelerate(wishdir, wishspeed, tea_q3accelerate.GetFloat(), mv->m_flMaxSpeed);
+	if (tea_movementmode.GetInt() == 0 || tea_movementmode.GetInt() == 2) AirAccelerate(wishdir, wishspeed, sv_airaccelerate.GetFloat(), 30);
 
 	// Add in any base velocity to the current velocity.
-	VectorAdd(mv->m_vecVelocity, player->GetBaseVelocity(), mv->m_vecVelocity );
+	VectorAdd( mv->m_vecVelocity, player->GetBaseVelocity(), mv->m_vecVelocity );
 
 	TryPlayerMove();
 

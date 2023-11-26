@@ -55,5 +55,7 @@ extern ConVar r_AirboatViewZHeight;
 extern ConVar tea_bhop_dampen_start;
 extern ConVar tea_bhop_dampen_severity;
 extern ConVar tea_airdash_zvel_influence;
+extern ConVar tea_q3accelerate;
+extern ConVar tea_movementmode;
 
 #endif // MOVEVARS_SHARED_H

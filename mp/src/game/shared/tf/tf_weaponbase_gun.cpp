@@ -125,11 +125,7 @@ void CTFWeaponBaseGun::PrimaryAttack( void )
 		SetWeaponIdleTime( gpGlobals->curtime + SequenceDuration() );
 	}
 
-	// Check the reload mode and behave appropriately.
-	if ( m_bReloadsSingly )
-	{
 		m_iReloadMode.Set( TF_RELOAD_START );
-	}
 }	
 
 //-----------------------------------------------------------------------------
@@ -171,19 +167,33 @@ CBaseEntity *CTFWeaponBaseGun::FireProjectile( CTFPlayer *pPlayer )
 		break;
 
 	case TF_PROJECTILE_SYRINGE:
-		pProjectile = FireNail( pPlayer, iProjectile );
+		if (pPlayer->IsPlayerClass(TF_CLASS_SOLDIER)) {
+			for (int i = 0; i < 10; i++) { //note to self for later: investigate m_WeaponData[TF_WEAPON_PRIMARY_MODE].m_nBulletsPerShot
+				pProjectile = FireNail(pPlayer, iProjectile);
+			}
+		}
+		else {
+			for (int i = 0; i < 3; i++) { //note to self for later: investigate m_WeaponData[TF_WEAPON_PRIMARY_MODE].m_nBulletsPerShot
+				pProjectile = FireNail(pPlayer, iProjectile);
+			}
+		}
 		pPlayer->DoAnimationEvent( PLAYERANIMEVENT_ATTACK_PRIMARY );
 		break;
 
 	case TF_PROJECTILE_PIPEBOMB:
-		for (int i = 0; i < 5; i++) { //note to self for later: investigate m_WeaponData[TF_WEAPON_PRIMARY_MODE].m_nBulletsPerShot
-			pProjectile = FirePipeBomb(pPlayer, false);
+		if (pPlayer->IsPlayerClass(TF_CLASS_SCOUT)) {
+			for (int i = 0; i < 5; i++) { //note to self for later: investigate m_WeaponData[TF_WEAPON_PRIMARY_MODE].m_nBulletsPerShot
+				pProjectile = FirePipeBomb(pPlayer, false, false);
+			}
+		}
+		else {
+			pProjectile = FirePipeBomb(pPlayer, false, true);
 		}
 		pPlayer->DoAnimationEvent( PLAYERANIMEVENT_ATTACK_PRIMARY );
 		break;
 
 	case TF_PROJECTILE_PIPEBOMB_REMOTE:
-		pProjectile = FirePipeBomb( pPlayer, true );
+		pProjectile = FirePipeBomb( pPlayer, true, false );
 		pPlayer->DoAnimationEvent( PLAYERANIMEVENT_ATTACK_PRIMARY );
 		break;
 
@@ -395,7 +405,7 @@ CBaseEntity *CTFWeaponBaseGun::FireNail( CTFPlayer *pPlayer, int iSpecificNail )
 //-----------------------------------------------------------------------------
 // Purpose: Fire a  pipe bomb
 //-----------------------------------------------------------------------------
-CBaseEntity *CTFWeaponBaseGun::FirePipeBomb( CTFPlayer *pPlayer, bool bRemoteDetonate )
+CBaseEntity *CTFWeaponBaseGun::FirePipeBomb( CTFPlayer *pPlayer, bool bRemoteDetonate, bool hasSpread )
 {
 	PlayWeaponShootSound();
 
@@ -408,12 +418,12 @@ CBaseEntity *CTFWeaponBaseGun::FirePipeBomb( CTFPlayer *pPlayer, bool bRemoteDet
 	Vector vecSrc = pPlayer->Weapon_ShootPosition();
 	vecSrc +=  vecForward * 36.0f + vecRight * 8.0f + vecUp * -6.0f;
 	
-	Vector vecVelocity = ( vecForward * GetProjectileSpeed() * 2 ) + ( vecUp * 200.0f ) + ( random->RandomFloat( -10.0f, 10.0f ) * vecRight ) +		
+	Vector vecVelocity = ( vecForward * GetProjectileSpeed() * 2.5 ) + ( vecUp * 200.0f ) + ( random->RandomFloat( -10.0f, 10.0f ) * vecRight ) +		
 		( random->RandomFloat( -10.0f, 10.0f ) * vecUp );
 
 	CTFGrenadePipebombProjectile *pProjectile = CTFGrenadePipebombProjectile::Create( vecSrc, pPlayer->EyeAngles(), vecVelocity, 
 		AngularImpulse( 600, random->RandomInt( -1200, 1200 ), 0 ),
-		pPlayer, GetTFWpnData(), bRemoteDetonate );
+		pPlayer, GetTFWpnData(), bRemoteDetonate, hasSpread );
 
 
 	if ( pProjectile )

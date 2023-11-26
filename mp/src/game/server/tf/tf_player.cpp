@@ -431,13 +431,12 @@ void CTFPlayer::MedicRegenThink( void )
 		{
 			// Heal faster if we haven't been in combat for a while
 			float flTimeSinceDamage = gpGlobals->curtime - GetLastDamageTime();
-			float flScale = RemapValClamped( flTimeSinceDamage, 5, 10, 1.0, 3.0 );
+			float flScale = RemapValClamped( flTimeSinceDamage, 0, 5, 0.02, 1 );
 
-			int iHealAmount = ceil(TF_MEDIC_REGEN_AMOUNT * flScale);
+			int iHealAmount = TF_MEDIC_REGEN_AMOUNT;
 			TakeHealth( iHealAmount, DMG_GENERIC );
+			SetContextThink( &CTFPlayer::MedicRegenThink, gpGlobals->curtime + TF_MEDIC_REGEN_TIME * flScale, "MedicRegenThink" );
 		}
-
-		SetContextThink( &CTFPlayer::MedicRegenThink, gpGlobals->curtime + TF_MEDIC_REGEN_TIME, "MedicRegenThink" );
 	}
 }
 
@@ -2391,6 +2390,7 @@ static float DamageForce( const Vector &size, float damage, float scale )
 }
 
 ConVar tf_debug_damage( "tf_debug_damage", "0", FCVAR_CHEAT | FCVAR_DEVELOPMENTONLY );
+ConVar tea_nodistancemod_dist("tea_nodistancemod_dist", "512", FCVAR_CHEAT);
 
 //-----------------------------------------------------------------------------
 // Purpose: 
@@ -2554,7 +2554,7 @@ int CTFPlayer::OnTakeDamage( const CTakeDamageInfo &inputInfo )
 				if ( bitsDamage & DMG_USEDISTANCEMOD )
 				{
 					float flDistance = max( 1.0, (WorldSpaceCenter() - info.GetAttacker()->WorldSpaceCenter()).Length() );
-					float flOptimalDistance = 512.0;
+					float flOptimalDistance = tea_nodistancemod_dist.GetFloat();
 
 					flCenter = RemapValClamped( flDistance / flOptimalDistance, 0.0, 2.0, 1.0, 0.0 );
 					if ( bitsDamage & DMG_NOCLOSEDISTANCEMOD )
@@ -2589,11 +2589,6 @@ int CTFPlayer::OnTakeDamage( const CTakeDamageInfo &inputInfo )
 							{
 								// Rocket launcher only has half the bonus of the other weapons at short range
 								flRandomDamage *= 0.5;
-							}
-							else if ( pWeapon->GetWeaponID() == TF_WEAPON_SCATTERGUN )
-							{
-								// Scattergun gets 50% bonus of other weapons at short range
-								flRandomDamage *= 1.5;
 							}
 							else if (pWeapon->GetWeaponID() == TF_WEAPON_SHOTGUN_PRIMARY)
 							{

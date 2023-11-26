@@ -2390,7 +2390,7 @@ float C_BasePlayer::GetFOV( void )
 #endif
 	if ( bUseDemoOverrideFov )
 	{
-		return clamp( demo_fov_override.GetFloat(), 10.0f, 90.0f );
+		return clamp( demo_fov_override.GetFloat(), 0.0f, 180.0f );
 	}
 
 	if ( GetObserverMode() == OBS_MODE_IN_EYE )

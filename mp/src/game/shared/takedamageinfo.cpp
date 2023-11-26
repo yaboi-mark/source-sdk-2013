@@ -333,8 +333,9 @@ void CalculateBulletDamageForce( CTakeDamageInfo *info, int iBulletType, const V
 	info->SetDamagePosition( vecForceOrigin );
 	Vector vecForce = vecBulletDir;
 	VectorNormalize( vecForce );
-	vecForce *= GetAmmoDef()->DamageForce( iBulletType );
+	vecForce *= GetAmmoDef()->DamageForce(iBulletType);
 	vecForce *= phys_pushscale.GetFloat();
+	vecForce.z += 8;
 	vecForce *= flScale;
 	info->SetDamageForce( vecForce );
 	Assert(vecForce!=vec3_origin);
