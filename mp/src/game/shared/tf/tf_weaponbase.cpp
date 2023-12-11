@@ -367,7 +367,32 @@ bool CTFWeaponBase::Holster( CBaseCombatWeapon *pSwitchingTo )
 	}
 #endif
 
-	return BaseClass::Holster( pSwitchingTo );
+	if (pSwitchingTo) {
+
+		float flOriginalPrimaryAttack = pSwitchingTo->m_flNextPrimaryAttack;
+
+		bool bHolster = BaseClass::Holster(pSwitchingTo);
+
+		if (bHolster)
+		{
+			// Overrides the anim length for calculating ready time.
+			// Don't override primary attacks that are already further out than this. This prevents
+			// people exploiting weapon switches to allow weapons to fire faster.
+			float flHolsterTime = m_pWeaponInfo->GetWeaponData(m_iWeaponMode).m_iHolsterSpeed;
+			pSwitchingTo->m_flNextPrimaryAttack = max(flOriginalPrimaryAttack, gpGlobals->curtime + flHolsterTime);
+
+			CTFPlayer *pPlayer = ToTFPlayer(GetOwner());
+			if (!pPlayer)
+				return false;
+
+			pPlayer->SetNextAttack(pSwitchingTo->m_flNextPrimaryAttack);
+		}
+
+		return bHolster;
+	}
+	else {
+		return BaseClass::Holster(pSwitchingTo);
+	}
 }
 
 //-----------------------------------------------------------------------------
@@ -395,7 +420,7 @@ bool CTFWeaponBase::Deploy( void )
 		// Overrides the anim length for calculating ready time.
 		// Don't override primary attacks that are already further out than this. This prevents
 		// people exploiting weapon switches to allow weapons to fire faster.
-		float flDeployTime = 0;
+		float flDeployTime = m_pWeaponInfo->GetWeaponData(m_iWeaponMode).m_iDeploySpeed;
 		m_flNextPrimaryAttack = max( flOriginalPrimaryAttack, gpGlobals->curtime + flDeployTime );
 
 		CTFPlayer *pPlayer = ToTFPlayer( GetOwner() );
@@ -422,10 +447,7 @@ void CTFWeaponBase::PrimaryAttack( void )
 
 	BaseClass::PrimaryAttack();
 
-	if ( m_bReloadsSingly )
-	{
-		m_iReloadMode.Set( TF_RELOAD_START );
-	}
+	m_iReloadMode.Set( TF_RELOAD_START );
 }
 
 //-----------------------------------------------------------------------------
@@ -437,8 +459,12 @@ void CTFWeaponBase::SecondaryAttack( void )
 	// Set the weapon mode.
 	m_iWeaponMode = TF_WEAPON_SECONDARY_MODE;
 
-	// Don't hook secondary for now.
-	return;
+	if (!CanAttack())
+		return;
+
+	BaseClass::SecondaryAttack();
+
+	m_iReloadMode.Set(TF_RELOAD_START);
 }
 
 //-----------------------------------------------------------------------------
@@ -478,11 +504,11 @@ void CTFWeaponBase::CalcIsAttackCritical( void)
 //-----------------------------------------------------------------------------
 bool CTFWeaponBase::CalcIsAttackCriticalHelper()
 {
-	if ( !tf_weapon_criticals.GetBool() )
+	CTFPlayer *pPlayer = ToTFPlayer(GetPlayerOwner());
+	if (!pPlayer)
 		return false;
 
-	CTFPlayer *pPlayer = ToTFPlayer( GetPlayerOwner() );
-	if ( !pPlayer )
+	if ( !tf_weapon_criticals.GetBool() )
 		return false;
 
 	float flPlayerCritMult = pPlayer->GetCritMult();
@@ -585,7 +611,7 @@ bool CTFWeaponBase::ReloadSingly( void )
 			// Play weapon and player animations.
 			if ( SendWeaponAnim( ACT_RELOAD_START ) )
 			{
-				SetReloadTimer( SequenceDuration() );
+				SetReloadTimer( GetTFWpnData().m_WeaponData[TF_WEAPON_PRIMARY_MODE].m_flTimeReloadStart );
 			}
 			else
 			{
@@ -707,69 +733,116 @@ void CTFWeaponBase::Operator_HandleAnimEvent( animevent_t *pEvent, CBaseCombatCh
 // -----------------------------------------------------------------------------
 bool CTFWeaponBase::DefaultReload( int iClipSize1, int iClipSize2, int iActivity )
 {
-	// The the owning local player.
-	CTFPlayer *pPlayer = GetTFPlayerOwner();
+	// Don't reload.
+	if ( m_flNextPrimaryAttack > gpGlobals->curtime )
+		return false;
+
+	// Get the current player.
+	CTFPlayer *pPlayer = ToTFPlayer( GetPlayerOwner() );
 	if ( !pPlayer )
 		return false;
 
-	// Setup and check for reload.
-	bool bReloadPrimary = false;
-	bool bReloadSecondary = false;
-
-	// If you don't have clips, then don't try to reload them.
-	if ( UsesClipsForAmmo1() )
+	// check to see if we're ready to reload
+	switch ( m_iReloadMode )
 	{
-		// need to reload primary clip?
-		int primary	= min( iClipSize1 - m_iClip1, pPlayer->GetAmmoCount( m_iPrimaryAmmoType ) );
-		if ( primary != 0 )
+	case TF_RELOAD_START:
 		{
-			bReloadPrimary = true;
-		}
-	}
+			// Play weapon and player animations.
+			if ( SendWeaponAnim( ACT_RELOAD_START ) )
+			{
+				SetReloadTimer( GetTFWpnData().m_WeaponData[TF_WEAPON_PRIMARY_MODE].m_flTimeReloadStart );
+			}
+			else
+			{
+				// Update the reload timers with script values.
+				UpdateReloadTimers( true );
+			}
 
-	if ( UsesClipsForAmmo2() )
-	{
-		// need to reload secondary clip?
-		int secondary = min( iClipSize2 - m_iClip2, pPlayer->GetAmmoCount( m_iSecondaryAmmoType ) );
-		if ( secondary != 0 )
+			// Next reload the shells.
+			m_iReloadMode.Set( TF_RELOADING );
+
+			m_iReloadStartClipAmount = Clip1();
+
+			return true;
+		}
+	case TF_RELOADING:
 		{
-			bReloadSecondary = true;
-		}
-	}
+			// Did we finish the reload start?  Now we can reload a rocket.
+			if ( m_flTimeWeaponIdle > gpGlobals->curtime )
+				return false;
 
-	// We didn't reload.
-	if ( !( bReloadPrimary || bReloadSecondary )  )
-		return false;
+			// Play weapon reload animations and sound.
+			if ( Clip1() == m_iReloadStartClipAmount )
+			{
+				pPlayer->DoAnimationEvent( PLAYERANIMEVENT_RELOAD );
+			}
+			else
+			{
+				pPlayer->DoAnimationEvent( PLAYERANIMEVENT_RELOAD_LOOP );
+			}
+
+			m_bReloadedThroughAnimEvent = false;
+
+			if ( SendWeaponAnim( ACT_VM_RELOAD ) )
+			{
+				SetReloadTimer( GetTFWpnData().m_WeaponData[TF_WEAPON_PRIMARY_MODE].m_flTimeReload );
+			}
+			else
+			{
+				// Update the reload timers.
+				UpdateReloadTimers( false );
+			}
 
 #ifndef CLIENT_DLL
-	// Play reload
-	WeaponSound( RELOAD );
+			WeaponSound( RELOAD );
 #endif
 
-	// Play the player's reload animation
-	pPlayer->DoAnimationEvent( PLAYERANIMEVENT_RELOAD );
+			// Next continue to reload shells?
+			m_iReloadMode.Set( TF_RELOADING_CONTINUE );
 
-	float flReloadTime;
-	// First, see if we have a reload animation
-	if ( SendWeaponAnim( iActivity ) )
-	{
-		flReloadTime = SequenceDuration();
-	}
-	else
-	{
-		// No reload animation. Use the script time.
-		flReloadTime = GetTFWpnData().m_WeaponData[TF_WEAPON_PRIMARY_MODE].m_flTimeReload;  
-		if ( bReloadSecondary )
+			return true;
+		}
+	case TF_RELOADING_CONTINUE:
 		{
-			flReloadTime = GetTFWpnData().m_WeaponData[TF_WEAPON_SECONDARY_MODE].m_flTimeReload;  
+			// Did we finish the reload start?  Now we can finish reloading the rocket.
+			if ( m_flTimeWeaponIdle > gpGlobals->curtime )
+				return false;
+
+			// If we have ammo, remove ammo and add it to clip
+			if ( pPlayer->GetAmmoCount( m_iPrimaryAmmoType ) > 0 && !m_bReloadedThroughAnimEvent )
+			{
+				int ammochange = min(GetMaxClip1() - m_iClip1, pPlayer->GetAmmoCount(m_iPrimaryAmmoType));
+				pPlayer->RemoveAmmo(ammochange, m_iPrimaryAmmoType);
+				m_iClip1 += ammochange;
+			}
+
+			if ( Clip1() == GetMaxClip1() || pPlayer->GetAmmoCount( m_iPrimaryAmmoType ) <= 0 )
+			{
+				m_iReloadMode.Set( TF_RELOAD_FINISH );
+			}
+			else
+			{
+				m_iReloadMode.Set( TF_RELOADING );
+			}
+
+			return true;
+		}
+
+	case TF_RELOAD_FINISH:
+	default:
+		{
+			if ( SendWeaponAnim( ACT_RELOAD_FINISH ) )
+			{
+				// We're done, allow primary attack as soon as we like
+				//SetReloadTimer( SequenceDuration() );
+			}
+
+			//pPlayer->DoAnimationEvent( PLAYERANIMEVENT_RELOAD_END );
+
+			m_iReloadMode.Set( TF_RELOAD_START );
+			return true;
 		}
 	}
-
-	SetReloadTimer( flReloadTime );
-
-	m_bInReload = true;
-
-	return true;
 }
 
 //-----------------------------------------------------------------------------
@@ -802,10 +875,10 @@ void CTFWeaponBase::SetReloadTimer( float flReloadTime )
 	float flTime = gpGlobals->curtime + flReloadTime;
 
 	// Set next player attack time (weapon independent).
-	pPlayer->m_flNextAttack = flTime;
+	//pPlayer->m_flNextAttack = flTime;
 
 	// Set next weapon attack times (based on reloading).
-	m_flNextPrimaryAttack = flTime;
+	//m_flNextPrimaryAttack = flTime;
 
 	// Don't push out secondary attack, because our secondary fire
 	// systems are all separate from primary fire (sniper zooming, demoman pipebomb detonating, etc)

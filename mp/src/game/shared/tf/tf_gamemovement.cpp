@@ -293,7 +293,7 @@ void CTFGameMovement::AirDash( void )
 	VectorNormalize( vecForward );
 	VectorNormalize( vecRight );
 
-	mv->m_vecVelocity.z *= tea_airdash_zvel_influence.GetFloat();
+	mv->m_vecVelocity.z *= tea_airdash_zvel_influence.GetFloat() * tea_airdash_zvel_influence_horizontal_dampening.GetFloat();
 
 	float preSpeed = VectorLength(mv->m_vecVelocity);
 
@@ -329,8 +329,13 @@ void CTFGameMovement::PreventBunnyJumping()
 	if ( spd <= maxscaledspeed )
 		return;
 
+	float flagmult = 1;
+	if (m_pTFPlayer->HasTheFlag()) {
+		flagmult = tea_flagcarrier_bhop_dampen_multiplier.GetFloat();
+	}
+
 	// Apply this cropping fraction to velocity
-	float fraction = (((1 - (maxscaledspeed / spd)) * -tea_bhop_dampen_severity.GetFloat()) + 1);
+	float fraction = (((1 - (maxscaledspeed / spd)) * -tea_bhop_dampen_severity.GetFloat() * flagmult) + 1);
 
 
 	mv->m_vecVelocity *= fraction;
@@ -876,8 +881,13 @@ void CTFGameMovement::AirMove( void )
 		wishspeed = mv->m_flMaxSpeed;
 	}
 
-	if ( tea_movementmode.GetInt() == 1 || tea_movementmode.GetInt() == 2 ) AirAccelerate( wishdir, wishspeed, tea_q3accelerate.GetFloat(), mv->m_flMaxSpeed );
-	if ( tea_movementmode.GetInt() == 0 || tea_movementmode.GetInt() == 2 ) AirAccelerate(wishdir, wishspeed, sv_airaccelerate.GetFloat(), 30);
+	float flagmult = 1;
+	if ( m_pTFPlayer->HasTheFlag() ) {
+		flagmult = tea_flagcarrier_universal_accelerate_multiplier.GetFloat();
+	}
+
+	if ( tea_movementmode.GetInt() == 1 || tea_movementmode.GetInt() == 2 ) AirAccelerate( wishdir, wishspeed, tea_q3accelerate.GetFloat() * flagmult, mv->m_flMaxSpeed );
+	if ( tea_movementmode.GetInt() == 0 || tea_movementmode.GetInt() == 2 ) AirAccelerate(wishdir, wishspeed, sv_airaccelerate.GetFloat() * flagmult, 30);
 
 	// Add in any base velocity to the current velocity.
 	VectorAdd( mv->m_vecVelocity, player->GetBaseVelocity(), mv->m_vecVelocity );

@@ -133,20 +133,65 @@ void CTFWeaponBaseGun::PrimaryAttack( void )
 //-----------------------------------------------------------------------------
 void CTFWeaponBaseGun::SecondaryAttack( void )
 {
-	// semi-auto behaviour
-	if ( m_bInAttack2 )
-		return;
-
 	// Get the player owning the weapon.
 	CTFPlayer *pPlayer = ToTFPlayer( GetPlayerOwner() );
 	if ( !pPlayer )
 		return;
 
+	// Are we capable of firing again?
+	if (m_flNextPrimaryAttack > gpGlobals->curtime)
+		return;
+
 	pPlayer->DoClassSpecialSkill();
+	// Check for ammunition.
+	if (m_iClip1 <= m_pWeaponInfo->GetWeaponData(m_iWeaponMode).m_iAmmoPerShot - 1 && m_iClip1 != -1)
+		return;
 
-	m_bInAttack2 = true;
+	if (!CanAttack())
+		return;
 
-	m_flNextSecondaryAttack = gpGlobals->curtime + 0.5;
+	CalcIsAttackCritical();
+
+#ifndef CLIENT_DLL
+	pPlayer->RemoveInvisibility();
+	pPlayer->RemoveDisguise();
+
+	// Minigun has custom handling
+	if (GetWeaponID() != TF_WEAPON_MINIGUN)
+	{
+		pPlayer->SpeakWeaponFire();
+	}
+	CTF_GameStats.Event_PlayerFiredWeapon(pPlayer, IsCurrentAttackACrit());
+#endif
+
+	// Set the weapon mode.
+	m_iWeaponMode = TF_WEAPON_SECONDARY_MODE;
+
+	SendWeaponAnim(ACT_VM_PRIMARYATTACK);
+
+	pPlayer->SetAnimation(PLAYER_ATTACK1);
+
+	FireProjectile(pPlayer);
+
+	// Set next attack times.
+	m_flNextPrimaryAttack = gpGlobals->curtime + m_pWeaponInfo->GetWeaponData(m_iWeaponMode).m_flTimeFireDelay;
+
+	// Don't push out secondary attack, because our secondary fire
+	// systems are all separate from primary fire (sniper zooming, demoman pipebomb detonating, etc)
+	//m_flNextSecondaryAttack = gpGlobals->curtime + m_pWeaponInfo->GetWeaponData( m_iWeaponMode ).m_flTimeFireDelay;
+
+	// Set the idle animation times based on the sequence duration, so that we play full fire animations
+	// that last longer than the refire rate may allow.
+	if (Clip1() > 0)
+	{
+		SetWeaponIdleTime(gpGlobals->curtime + SequenceDuration());
+	}
+	else
+	{
+		SetWeaponIdleTime(gpGlobals->curtime + SequenceDuration());
+	}
+
+	m_iReloadMode.Set(TF_RELOAD_START);
 }
 
 CBaseEntity *CTFWeaponBaseGun::FireProjectile( CTFPlayer *pPlayer )
@@ -162,38 +207,30 @@ CBaseEntity *CTFWeaponBaseGun::FireProjectile( CTFPlayer *pPlayer )
 		break;
 
 	case TF_PROJECTILE_ROCKET:
-		pProjectile = FireRocket( pPlayer );
+		for (int i = 0; i < m_pWeaponInfo->GetWeaponData(m_iWeaponMode).m_nBulletsPerShot; i++) {
+			pProjectile = FireRocket(pPlayer);
+		}
 		pPlayer->DoAnimationEvent( PLAYERANIMEVENT_ATTACK_PRIMARY );
 		break;
 
 	case TF_PROJECTILE_SYRINGE:
-		if (pPlayer->IsPlayerClass(TF_CLASS_SOLDIER)) {
-			for (int i = 0; i < 10; i++) { //note to self for later: investigate m_WeaponData[TF_WEAPON_PRIMARY_MODE].m_nBulletsPerShot
-				pProjectile = FireNail(pPlayer, iProjectile);
-			}
-		}
-		else {
-			for (int i = 0; i < 3; i++) { //note to self for later: investigate m_WeaponData[TF_WEAPON_PRIMARY_MODE].m_nBulletsPerShot
-				pProjectile = FireNail(pPlayer, iProjectile);
-			}
+		for (int i = 0; i < m_pWeaponInfo->GetWeaponData(m_iWeaponMode).m_nBulletsPerShot; i++) {
+			pProjectile = FireNail(pPlayer, iProjectile);
 		}
 		pPlayer->DoAnimationEvent( PLAYERANIMEVENT_ATTACK_PRIMARY );
 		break;
 
 	case TF_PROJECTILE_PIPEBOMB:
-		if (pPlayer->IsPlayerClass(TF_CLASS_SCOUT)) {
-			for (int i = 0; i < 5; i++) { //note to self for later: investigate m_WeaponData[TF_WEAPON_PRIMARY_MODE].m_nBulletsPerShot
-				pProjectile = FirePipeBomb(pPlayer, false, false);
-			}
-		}
-		else {
-			pProjectile = FirePipeBomb(pPlayer, false, true);
+		for (int i = 0; i < m_pWeaponInfo->GetWeaponData(m_iWeaponMode).m_nBulletsPerShot; i++) {
+			pProjectile = FirePipeBomb(pPlayer, false, false);
 		}
 		pPlayer->DoAnimationEvent( PLAYERANIMEVENT_ATTACK_PRIMARY );
 		break;
 
 	case TF_PROJECTILE_PIPEBOMB_REMOTE:
-		pProjectile = FirePipeBomb( pPlayer, true, false );
+		for (int i = 0; i < m_pWeaponInfo->GetWeaponData(m_iWeaponMode).m_nBulletsPerShot; i++) {
+			pProjectile = FirePipeBomb(pPlayer, true, false);
+		}
 		pPlayer->DoAnimationEvent( PLAYERANIMEVENT_ATTACK_PRIMARY );
 		break;
 

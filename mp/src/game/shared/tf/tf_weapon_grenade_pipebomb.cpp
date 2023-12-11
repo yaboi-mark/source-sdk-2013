@@ -291,7 +291,6 @@ CTFGrenadePipebombProjectile* CTFGrenadePipebombProjectile::Create( const Vector
 		DispatchSpawn( pGrenade );
 
 		int flSpread = 100;
-		if (!hasSpread) flSpread = 0;
 		
 		Vector randomSpread (RandomFloat( -flSpread, flSpread ),RandomFloat( -flSpread, flSpread ),RandomFloat( -flSpread, flSpread ));
 

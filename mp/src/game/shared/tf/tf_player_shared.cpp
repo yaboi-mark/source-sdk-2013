@@ -914,7 +914,7 @@ void CTFPlayerShared::Burn( CTFPlayer *pAttacker )
 		return;
 
 	// pyros don't burn persistently or take persistent burning damage, but we show brief burn effect so attacker can tell they hit
-	bool bVictimIsPyro = ( TF_CLASS_PYRO ==  m_pOuter->GetPlayerClass()->GetClassIndex() );
+	bool bVictimIsPyro = /*( TF_CLASS_PYRO ==  m_pOuter->GetPlayerClass()->GetClassIndex() )*/ false;
 
 	if ( !InCond( TF_COND_BURNING ) )
 	{

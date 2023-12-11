@@ -2504,7 +2504,21 @@ int CTFPlayer::OnTakeDamage( const CTakeDamageInfo &inputInfo )
 	if ( info.GetAttacker() != this && !(bitsDamage & (DMG_DROWN | DMG_FALL)) ) 
 	{
 		float flDamage = 0;
-		if ( bitsDamage & DMG_CRITICAL )
+		bool isACrit = false;
+		if (bitsDamage & DMG_CRITICAL)
+			isACrit = true;
+		else if ((bitsDamage & DMG_IGNITE) && m_Shared.InCond(TF_COND_BURNING)) {
+			CTFWeaponBase *pWeapon = ToTFPlayer(info.GetAttacker())->GetActiveTFWeapon();
+			if (pWeapon)
+			{
+				if (pWeapon->GetWeaponID() == TF_WEAPON_SHOTGUN_PYRO)
+				{
+					// Rocket launcher only has half the bonus of the other weapons at short range
+					isACrit = true;
+				}
+			}
+		}
+		if ( isACrit )
 		{
 			if ( bDebug )
 			{
@@ -2873,17 +2887,17 @@ int CTFPlayer::OnTakeDamage_Alive( const CTakeDamageInfo &info )
 				// Sentryguns push a lot harder
 				if ( (info.GetDamageType() & DMG_BULLET) && info.GetInflictor()->IsBaseObject() )
 				{
-					vecForce = vecDir * -DamageForce( WorldAlignSize(), info.GetDamage(), 16 );
+					vecForce = vecDir * -DamageForce( WorldAlignSize(), info.GetDamage(), 4 );
 				}
 				else
 				{
 					vecForce = vecDir * -DamageForce( WorldAlignSize(), info.GetDamage(), tf_damageforcescale_other.GetFloat() );
 
-					if ( IsPlayerClass( TF_CLASS_HEAVYWEAPONS ) )
+					/*if ( IsPlayerClass( TF_CLASS_HEAVYWEAPONS ) )
 					{
-						// Heavies take less push from non sentryguns
+						// Heavies take less push from non sentryguns // you were saying???????? :exploding_boar_head:
 						vecForce *= 0.5;
-					}
+					}*/
 				}
 			}
 
@@ -3009,6 +3023,8 @@ bool CTFPlayer::ShouldGib( const CTakeDamageInfo &info )
 	return false;
 }
 
+ConVar tea_mutator_teleportonkill("tea_mutator_teleportonkill", "0", FCVAR_CHEAT | FCVAR_NOTIFY);
+
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
@@ -3079,7 +3095,10 @@ void CTFPlayer::Event_Killed( const CTakeDamageInfo &info )
 	CTFPlayer *pPlayerAttacker = NULL;
 	if ( info.GetAttacker() && info.GetAttacker()->IsPlayer() )
 	{
-		pPlayerAttacker = ToTFPlayer( info.GetAttacker() );
+		pPlayerAttacker = ToTFPlayer(info.GetAttacker());
+		//if (tea_mutator_teleportonkill.GetBool()) {
+		//	pPlayerAttacker.Teleport(info.GetAttacker()->GetAbsOrigin(), &(GetAbsAngles()), &vec3_origin);
+		//}
 	}
 
 	bool bDisguised = m_Shared.InCond( TF_COND_DISGUISED );

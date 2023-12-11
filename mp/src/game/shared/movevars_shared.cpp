@@ -98,7 +98,7 @@ ConVar	sv_backspeed	( "sv_backspeed", "0.6", FCVAR_ARCHIVE | FCVAR_REPLICATED, "
 ConVar  sv_waterdist	( "sv_waterdist","12", FCVAR_REPLICATED, "Vertical view fixup when eyes are near water plane." );
 #else
 ConVar	sv_bounce		( "sv_bounce","0", FCVAR_NOTIFY | FCVAR_REPLICATED, "Bounce multiplier for when physically simulated objects collide with other objects." );
-ConVar	sv_maxvelocity	( "sv_maxvelocity","3500", FCVAR_REPLICATED, "Maximum speed any ballistically moving object is allowed to attain per axis." );
+ConVar	sv_maxvelocity	( "sv_maxvelocity","10000", FCVAR_REPLICATED, "Maximum speed any ballistically moving object is allowed to attain per axis." );
 ConVar	sv_stepsize		( "sv_stepsize","18", FCVAR_NOTIFY | FCVAR_REPLICATED  );
 ConVar	sv_backspeed	( "sv_backspeed", "0.6", FCVAR_ARCHIVE | FCVAR_REPLICATED, "How much to slow down backwards motion" );
 ConVar  sv_waterdist	( "sv_waterdist","12", FCVAR_REPLICATED, "Vertical view fixup when eyes are near water plane." );
@@ -121,6 +121,10 @@ ConVar r_AirboatViewZHeight( "r_AirboatViewZHeight", "0.0", FCVAR_CHEAT | FCVAR_
 
 // tea for two convars
 
-ConVar tea_bhop_dampen_start("tea_bhop_dampen_start", "1.0", FCVAR_CHEAT | FCVAR_NOTIFY | FCVAR_REPLICATED);
-ConVar tea_bhop_dampen_severity("tea_bhop_dampen_severity", "0.1", FCVAR_CHEAT | FCVAR_NOTIFY | FCVAR_REPLICATED);
-ConVar tea_airdash_zvel_influence("tea_airdash_zvel_influence", "1", FCVAR_CHEAT | FCVAR_NOTIFY | FCVAR_REPLICATED);
+ConVar tea_bhop_dampen_start("tea_bhop_dampen_start", "1.0", FCVAR_CHEAT | FCVAR_NOTIFY | FCVAR_REPLICATED, "when you jump off the ground and your horizontal velocity is over (this number * your class's movespeed), limits your horizontal velocity based on the value of tea_bhop_dampen_severity.");
+ConVar tea_bhop_dampen_severity("tea_bhop_dampen_severity", "0.1", FCVAR_CHEAT | FCVAR_NOTIFY | FCVAR_REPLICATED, "changes the amount of limiting when going over tea_bhop_dampen_start. 0 is no limiting, 1 is full limiting, going outside of 0 and 1 can be catastrophic and is not reccomended.");
+ConVar tea_airdash_zvel_influence("tea_airdash_zvel_influence", "1", FCVAR_CHEAT | FCVAR_NOTIFY | FCVAR_REPLICATED, "when you double jump, there is a calculation that checks how fast you're moving, including vertically. this convar multiplies that vertical velocity influence. also see tea_airdash_zvel_influence_horizontal_dampening" );
+ConVar tea_overspeed_friction("tea_overspeed_friction", "1", FCVAR_CHEAT | FCVAR_NOTIFY | FCVAR_REPLICATED, "if a player is on the ground and over their movement speed, this value is used instead of sv_friction. (CURRENTLY UNIMPLEMENTED)");
+ConVar tea_airdash_zvel_influence_horizontal_dampening("tea_airdash_zvel_influence_horizontal_dampening", "1", FCVAR_CHEAT | FCVAR_NOTIFY | FCVAR_REPLICATED, "when you double jump, there is a calculation that checks how fast you're moving, including vertically. however, the way this is calculated causes higher horizontal velocities to cause vertical velocities to have less effect during double jumps. this changes how much we ignore that dampening.");
+ConVar tea_flagcarrier_universal_accelerate_multiplier("tea_flagcarrier_universal_accelerate_multiplier", "0.75", FCVAR_CHEAT | FCVAR_NOTIFY | FCVAR_REPLICATED, "when you have the flag, your sv_accelerate, sv_airaccelerate, and tea_q3accelerate are multiplied by this amount.");
+ConVar tea_flagcarrier_bhop_dampen_multiplier("tea_flagcarrier_bhop_dampen_multiplier", "1.5", FCVAR_CHEAT | FCVAR_NOTIFY | FCVAR_REPLICATED, "when you have the flag, your tea_bhop_dampen_severity is multiplied by this amount.");

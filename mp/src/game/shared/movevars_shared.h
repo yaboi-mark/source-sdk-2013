@@ -57,5 +57,9 @@ extern ConVar tea_bhop_dampen_severity;
 extern ConVar tea_airdash_zvel_influence;
 extern ConVar tea_q3accelerate;
 extern ConVar tea_movementmode;
+extern ConVar tea_overspeed_friction;
+extern ConVar tea_airdash_zvel_influence_horizontal_dampening;
+extern ConVar tea_flagcarrier_universal_accelerate_multiplier;
+extern ConVar tea_flagcarrier_bhop_dampen_multiplier;
 
 #endif // MOVEVARS_SHARED_H
