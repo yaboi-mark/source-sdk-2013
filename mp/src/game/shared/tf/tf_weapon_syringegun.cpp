@@ -50,3 +50,8 @@ void CTFSyringeGun::Precache()
 	PrecacheParticleSystem( "nailtrails_medic_red" );
 #endif
 }
+
+CTFSyringeGun::CTFSyringeGun()
+{
+	m_bReloadsSingly = true;
+}
