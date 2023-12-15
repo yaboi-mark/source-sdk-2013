@@ -559,6 +559,33 @@ void DrawAllDebugOverlays( void )
 }
 
 CServerGameDLL g_ServerGameDLL;
+static void MountAdditionalContent()
+{
+	KeyValues *pMainFile = new KeyValues("gameinfo.txt");
+#ifndef _WINDOWS
+	// case sensitivity
+	pMainFile->LoadFromFile(filesystem, "GameInfo.txt", "MOD");
+	if (!pMainFile)
+#endif
+		pMainFile->LoadFromFile(filesystem, "gameinfo.txt", "MOD");
+
+	if (pMainFile)
+	{
+		KeyValues* pFileSystemInfo = pMainFile->FindKey("FileSystem");
+		if (pFileSystemInfo)
+			for (KeyValues *pKey = pFileSystemInfo->GetFirstSubKey(); pKey; pKey = pKey->GetNextKey())
+			{
+				if (strcmp(pKey->GetName(), "AdditionalContentId") == 0)
+				{
+					int appid = abs(pKey->GetInt());
+					if (appid)
+						if (filesystem->MountSteamContent(-appid) != FILESYSTEM_MOUNT_OK)
+							Warning("Unable to mount extra content with appId: %i\n", appid);
+				}
+			}
+	}
+	pMainFile->deleteThis();
+}
 // INTERFACEVERSION_SERVERGAMEDLL_VERSION_8 is compatible with the latest since we're only adding things to the end, so expose that as well.
 //EXPOSE_SINGLE_INTERFACE_GLOBALVAR(CServerGameDLL, IServerGameDLL008, INTERFACEVERSION_SERVERGAMEDLL_VERSION_8, g_ServerGameDLL );
 EXPOSE_SINGLE_INTERFACE_GLOBALVAR(CServerGameDLL, IServerGameDLL, INTERFACEVERSION_SERVERGAMEDLL, g_ServerGameDLL);
@@ -637,6 +664,8 @@ bool CServerGameDLL::DLLInit( CreateInterfaceFn appSystemFactory,
 	// Yes, both the client and game .dlls will try to Connect, the soundemittersystem.dll will handle this gracefully
 	if ( !soundemitterbase->Connect( appSystemFactory ) )
 		return false;
+
+	MountAdditionalContent();
 
 	// cache the globals
 	gpGlobals = pGlobals;

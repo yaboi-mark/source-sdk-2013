@@ -79,8 +79,8 @@
 #define TF_INVADE_CAPTURED_FRAGS		10
 #define TF_INVADE_CAPTURED_TEAM_FRAGS	1
 
-#define TF_INVADE_RESET_TIME			60.0f
-#define TF_INVADE_NEUTRAL_TIME			30.0f
+#define TF_INVADE_RESET_TIME			69420.0f
+#define TF_INVADE_NEUTRAL_TIME			0.0f
 
 #ifdef CLIENT_DLL
 	#define CCaptureFlagReturnIcon C_CaptureFlagReturnIcon

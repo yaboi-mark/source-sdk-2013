@@ -125,7 +125,7 @@ void CTFBaseRocket::Spawn( void )
 
 	// Setup attributes.
 	m_takedamage = DAMAGE_NO;
-	SetGravity( 0.0f );
+	SetGravity( 100.0 );
 
 	// Setup the touch and think functions.
 	SetTouch( &CTFBaseRocket::RocketTouch );
@@ -133,7 +133,7 @@ void CTFBaseRocket::Spawn( void )
 	SetNextThink( gpGlobals->curtime );
 
 	// Don't collide with players on the owner's team for the first bit of our life
-	m_flCollideWithTeammatesTime = gpGlobals->curtime + 0.25;
+	m_flCollideWithTeammatesTime = gpGlobals->curtime + 30;
 	m_bCollideWithTeammates = false;
 
 #endif
@@ -218,7 +218,7 @@ CTFBaseRocket *CTFBaseRocket::Create( const char *pszClassname, const Vector &ve
 	Vector vecForward, vecRight, vecUp;
 	AngleVectors( vecAngles, &vecForward, &vecRight, &vecUp );
 
-	Vector vecVelocity = vecForward * 1100.0f;
+	Vector vecVelocity = vecForward * 3000.0f;
 	pRocket->SetAbsVelocity( vecVelocity );	
 	pRocket->SetupInitialTransmittedGrenadeVelocity( vecVelocity );
 
@@ -310,7 +310,7 @@ void CTFBaseRocket::Explode( trace_t *pTrace, CBaseEntity *pOther )
 		pAttacker = pScorerInterface->GetScorer();
 	}
 
-	CTakeDamageInfo info( this, pAttacker, vec3_origin, vecOrigin, GetDamage(), GetDamageType() );
+	CTakeDamageInfo info( this, pAttacker, vec3_origin, vecOrigin, GetDamage(), DMG_IGNITE, TF_DMG_CUSTOM_BURNING );
 	float flRadius = GetRadius();
 	RadiusDamage( info, vecOrigin, flRadius, CLASS_NONE, NULL );
 

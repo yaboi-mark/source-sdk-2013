@@ -1796,6 +1796,15 @@
     <ClInclude Include="toolframework_server.h">
       <Filter>Tools Framework</Filter>
     </ClInclude>
+    <ClInclude Include="..\client\tf_weapon_spaz.h">
+      <Filter>Source Files\TF\Weapon</Filter>
+    </ClInclude>
+    <ClInclude Include="..\client\tf_weapon_doublebarrel.h">
+      <Filter>Source Files\TF\Weapon</Filter>
+    </ClInclude>
+    <ClInclude Include="tf_weapon_british_grenade.h">
+      <Filter>Source Files\TF\Weapon</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="gamedll_replay.cpp">
@@ -3342,6 +3351,15 @@
     </ClCompile>
     <ClCompile Include="toolframework_server.cpp">
       <Filter>Tools Framework</Filter>
+    </ClCompile>
+    <ClCompile Include="..\client\tf_weapon_spaz.cpp">
+      <Filter>Source Files\TF\Weapon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\client\tf_weapon_doublebarrel.cpp">
+      <Filter>Source Files\TF\Weapon</Filter>
+    </ClCompile>
+    <ClCompile Include="tf_weapon_british_grenade.cpp">
+      <Filter>Source Files\TF\Weapon</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

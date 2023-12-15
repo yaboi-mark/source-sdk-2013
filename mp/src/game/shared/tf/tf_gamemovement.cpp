@@ -36,7 +36,7 @@ ConVar  tf_solidobjects( "tf_solidobjects", "1", FCVAR_REPLICATED | FCVAR_CHEAT 
 ConVar	tf_clamp_back_speed( "tf_clamp_back_speed", "1", FCVAR_REPLICATED);
 ConVar  tf_clamp_back_speed_min( "tf_clamp_back_speed_min", "0", FCVAR_REPLICATED);
 
-#define TF_WATERJUMP_FORWARD  30
+#define TF_WATERJUMP_FORWARD  300
 #define TF_WATERJUMP_UP       300
 //ConVar	tf_waterjump_up( "tf_waterjump_up", "300", FCVAR_REPLICATED | FCVAR_CHEAT | FCVAR_DEVELOPMENTONLY );
 //ConVar	tf_waterjump_forward( "tf_waterjump_forward", "30", FCVAR_REPLICATED | FCVAR_CHEAT | FCVAR_DEVELOPMENTONLY );
@@ -293,7 +293,7 @@ void CTFGameMovement::AirDash( void )
 	VectorNormalize( vecForward );
 	VectorNormalize( vecRight );
 
-	mv->m_vecVelocity.z *= tea_airdash_zvel_influence.GetFloat();
+	mv->m_vecVelocity.z *= tea_airdash_zvel_influence.GetFloat() * tea_airdash_zvel_influence_horizontal_dampening.GetFloat();
 
 	float preSpeed = VectorLength(mv->m_vecVelocity);
 
@@ -329,8 +329,13 @@ void CTFGameMovement::PreventBunnyJumping()
 	if ( spd <= maxscaledspeed )
 		return;
 
+	float flagmult = 1;
+	if (m_pTFPlayer->HasTheFlag()) {
+		flagmult = tea_flagcarrier_bhop_dampen_multiplier.GetFloat();
+	}
+
 	// Apply this cropping fraction to velocity
-	float fraction = (((1 - (maxscaledspeed / spd)) * -tea_bhop_dampen_severity.GetFloat()) + 1);
+	float fraction = (((1 - (maxscaledspeed / spd)) * -tea_bhop_dampen_severity.GetFloat() * flagmult) + 1);
 
 
 	mv->m_vecVelocity *= fraction;
@@ -707,6 +712,7 @@ void CTFGameMovement::WaterMove( void )
 //-----------------------------------------------------------------------------
 void CTFGameMovement::WalkMove( void )
 {
+	float flOldSpeed = VectorLength(mv->m_vecVelocity);
 	// Get the movement angles.
 	Vector vecForward, vecRight, vecUp;
 	AngleVectors( mv->m_vecViewAngles, &vecForward, &vecRight, &vecUp );
@@ -735,7 +741,7 @@ void CTFGameMovement::WalkMove( void )
 
 	// Clamp the players speed in x,y.
 	float flNewSpeed = VectorLength( mv->m_vecVelocity );
-	if ( flNewSpeed > mv->m_flMaxSpeed )
+	if ( flNewSpeed > mv->m_flMaxSpeed && flOldSpeed <= mv->m_flMaxSpeed )
 	{
 		float flScale = ( mv->m_flMaxSpeed / flNewSpeed );
 		mv->m_vecVelocity.x *= flScale;
@@ -875,7 +881,13 @@ void CTFGameMovement::AirMove( void )
 		wishspeed = mv->m_flMaxSpeed;
 	}
 
-	AirAccelerate( wishdir, wishspeed, sv_airaccelerate.GetFloat() );
+	float flagmult = 1;
+	if ( m_pTFPlayer->HasTheFlag() ) {
+		flagmult = tea_flagcarrier_universal_accelerate_multiplier.GetFloat();
+	}
+
+	if ( tea_movementmode.GetInt() == 1 || tea_movementmode.GetInt() == 2 ) AirAccelerate( wishdir, wishspeed, tea_q3accelerate.GetFloat() * flagmult, mv->m_flMaxSpeed );
+	if ( tea_movementmode.GetInt() == 0 || tea_movementmode.GetInt() == 2 ) AirAccelerate(wishdir, wishspeed, sv_airaccelerate.GetFloat() * flagmult, 30);
 
 	// Add in any base velocity to the current velocity.
 	VectorAdd( mv->m_vecVelocity, player->GetBaseVelocity(), mv->m_vecVelocity );

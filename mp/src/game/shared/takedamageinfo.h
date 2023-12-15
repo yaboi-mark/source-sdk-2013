@@ -19,8 +19,8 @@
 #define BASEDAMAGE_NOT_SPECIFIED	FLT_MAX
 
 class CBaseEntity;
-extern ConVar tea_vertical_explosion_knockback_increase;
-extern ConVar tea_overall_explosion_knockback_increase;
+//extern ConVar tea_vertical_explosion_knockback_increase;
+//extern ConVar tea_overall_explosion_knockback_increase;
 
 
 class CTakeDamageInfo

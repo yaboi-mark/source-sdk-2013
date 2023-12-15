@@ -213,6 +213,9 @@ BEGIN_DATADESC( CTFGameRulesProxy )
 	DEFINE_INPUTFUNC( FIELD_STRING, "SetBlueTeamGoalString", InputSetBlueTeamGoalString ),
 	DEFINE_INPUTFUNC( FIELD_INTEGER, "SetRedTeamRole", InputSetRedTeamRole ),
 	DEFINE_INPUTFUNC( FIELD_INTEGER, "SetBlueTeamRole", InputSetBlueTeamRole ),
+
+	//DEFINE_OUTPUT( m_outputOnRedWinCtf, "OnRedWinCtf" ),
+	//DEFINE_OUTPUT( m_outputOnBlueWinCtf, "OnBlueWinCtf" ),
 END_DATADESC()
 
 //-----------------------------------------------------------------------------
@@ -1242,7 +1245,8 @@ void CTFGameRules::RadiusDamage( const CTakeDamageInfo &info, const Vector &vecS
 
 			if ( iMaxCaps != -1 && pMaxTeam != NULL )
 			{
-				SetWinningTeam( pMaxTeam->GetTeamNumber(), WINREASON_FLAG_CAPTURE_LIMIT );
+				SetWinningTeam( pMaxTeam->GetTeamNumber(), WINREASON_FLAG_CAPTURE_LIMIT ); // THIS IS THE LINE THAT CAUSES THE WIN FOR CTF. I AM BASICALLY BOOKMARKING THIS FOR LATER. ASDFGHJKL
+				//m_outputOnRedWinCtf.FireOutput( this, this );
 				return true;
 			}
 		}
@@ -1639,7 +1643,7 @@ void CTFGameRules::ClientSettingsChanged( CBasePlayer *pPlayer )
 
 	const char *pszFov = engine->GetClientConVarValue( pPlayer->entindex(), "fov_desired" );
 	int iFov = atoi(pszFov);
-	iFov = clamp( iFov, 75, 90 );
+	iFov = clamp( iFov, 0, 180 );
 	pTFPlayer->SetDefaultFOV( iFov );
 }
 
@@ -2058,19 +2062,23 @@ void CTFGameRules::ClientDisconnected( edict_t *pClient )
 // Falling damage stuff.
 #define TF_PLAYER_MAX_SAFE_FALL_SPEED	650		
 
+ConVar tea_fall_damage_threshold( "tea_fall_damage_threshold", "69420.0", FCVAR_REPLICATED, "threshold of hu/s downwards before fall damage stops being blocked. tf2 default is 650." );
+ConVar tea_fall_damage_multiplier( "tea_fall_damage_multiplier", "2.0", FCVAR_REPLICATED, "multiplier on fall damage taken. tf2 default is 5." );
+ConVar tea_fall_damage_spread( "tea_fall_damage_spread", "0.0", FCVAR_REPLICATED, "random spread multiplier on fall damage taken. tf2 default is 0.2. to have no spread, set the value to 0." );
+
 float CTFGameRules::FlPlayerFallDamage( CBasePlayer *pPlayer )
 {
-	if ( pPlayer->m_Local.m_flFallVelocity > TF_PLAYER_MAX_SAFE_FALL_SPEED )
+	if ( pPlayer->m_Local.m_flFallVelocity > tea_fall_damage_threshold.GetFloat() )
 	{
 		// Old TFC damage formula
-		float flFallDamage = 5 * (pPlayer->m_Local.m_flFallVelocity / 300);
+		float flFallDamage = tea_fall_damage_multiplier.GetFloat() * (pPlayer->m_Local.m_flFallVelocity / 300);
 
 		// Fall damage needs to scale according to the player's max health, or
 		// it's always going to be much more dangerous to weaker classes than larger.
 		float flRatio = (float)pPlayer->GetMaxHealth() / 100.0;
 		flFallDamage *= flRatio;
 
-		flFallDamage *= random->RandomFloat( 0.8, 1.2 );
+		flFallDamage *= random->RandomFloat( 1 - tea_fall_damage_spread.GetFloat(), 1 + tea_fall_damage_spread.GetFloat());
 
 		return flFallDamage;
 	}

@@ -265,8 +265,7 @@ void CDamageAccountPanel::OnDamaged( IGameEvent *event )
 			
 			// Don't show damage notifications for cloaked enemies.
 			if ( pTFVictim->m_Shared.InCond( TF_COND_STEALTHED ) ||
-				 pTFVictim->m_Shared.InCond( TF_COND_STEALTHED_BLINK ) ||
-				 pTFVictim->m_Shared.InCond( TF_COND_BLINK_IMMUNE ) )
+				 pTFVictim->m_Shared.InCond( TF_COND_STEALTHED_BLINK ) )
 				return;
 			
 		}
@@ -274,8 +273,6 @@ void CDamageAccountPanel::OnDamaged( IGameEvent *event )
 		// Play hit sound, if appliable.
 		bool bDinged = false;
 		
-		if (tf2v_allow_hitsounds.GetBool())
-		{
 			if (tf_dingalingaling_lasthit.GetBool() && iHealth == 0)
 			{
 				// This guy is dead, play kill sound.
@@ -288,13 +285,12 @@ void CDamageAccountPanel::OnDamaged( IGameEvent *event )
 				PlayHitSound(iDmgAmount, false);
 				bDinged = true;
 			}
-		}
 
 		// Leftover from old code?
 		g_pClientMode->GetViewportAnimationController()->StartAnimationSequence( "DamagedPlayer" );
 
 		// Stop here if we chose not to show hit numbers.
-		if ( !hud_combattext.GetBool() || !tf2v_allow_combattext.GetBool() )
+		if ( !hud_combattext.GetBool() )
 			return;
 
 		// Don't show the numbers if we can't see the victim.
@@ -360,7 +356,7 @@ void CDamageAccountPanel::OnHealed( IGameEvent *event )
 	if ( !pPlayer || !pPlayer->IsAlive() )
 		return;
 
-	if ( ( !hud_combattext.GetBool() || !tf2v_allow_combattext.GetBool() )  || !hud_combattext_healing.GetBool() )
+	if ( ( !hud_combattext.GetBool() )  || !hud_combattext_healing.GetBool() )
 		return;
 
 	int iPatient = event->GetInt( "patient" );
@@ -415,7 +411,7 @@ void CDamageAccountPanel::OnBonus( IGameEvent *event )
 	if ( !pPlayer || !pPlayer->IsAlive() )
 		return;
 
-	if ( !hud_combattext.GetBool() || !tf2v_allow_combattext.GetBool() )
+	if ( !hud_combattext.GetBool() )
 		return;
 
 	short iTarget = event->GetInt( "player_entindex" );

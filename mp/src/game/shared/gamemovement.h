@@ -98,10 +98,10 @@ protected:
 	// Handles both ground friction and water friction
 	void			Friction( void );
 
-	virtual void	AirAccelerate( Vector& wishdir, float wishspeed, float accel );
+	virtual void	AirAccelerate( Vector& wishdir, float wishspeed, float accel, float maxSpeed );
 
 	virtual void	AirMove( void );
-	virtual float	GetAirSpeedCap( void ) { return 30.f; }
+	//virtual float	GetAirSpeedCap( void ) { return 300.f; }
 	
 	virtual bool	CanAccelerate();
 	virtual void	Accelerate( Vector& wishdir, float wishspeed, float accel);

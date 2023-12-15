@@ -151,10 +151,10 @@ ConVar mp_showcleanedupents( "mp_showcleanedupents", "0", FCVAR_CHEAT | FCVAR_DE
 ConVar mp_bonusroundtime( "mp_bonusroundtime", "15", FCVAR_REPLICATED, "Time after round win until round restarts", true, 5, true, 15 );
 ConVar mp_restartround( "mp_restartround", "0", FCVAR_GAMEDLL, "If non-zero, the current round will restart in the specified number of seconds" );	
 ConVar mp_winlimit( "mp_winlimit", "0", FCVAR_REPLICATED, "Max score one team can reach before server changes maps", true, 0, false, 0 );
-ConVar mp_stalemate_timelimit( "mp_stalemate_timelimit", "240", FCVAR_REPLICATED, "Timelimit (in seconds) of the stalemate round." );
+ConVar mp_stalemate_timelimit( "mp_stalemate_timelimit", "60", FCVAR_REPLICATED, "Timelimit (in seconds) of the stalemate round." );
 ConVar mp_autoteambalance( "mp_autoteambalance", "1", FCVAR_NOTIFY );
 ConVar mp_maxrounds( "mp_maxrounds", "0", FCVAR_REPLICATED | FCVAR_NOTIFY, "max number of rounds to play before server changes maps", true, 0, false, 0 );
-ConVar mp_stalemate_enable( "mp_stalemate_enable", "0", FCVAR_REPLICATED | FCVAR_NOTIFY, "Enable/Disable stalemate mode." );
+ConVar mp_stalemate_enable( "mp_stalemate_enable", "1", FCVAR_REPLICATED | FCVAR_NOTIFY, "Enable/Disable stalemate mode." );
 
 //-----------------------------------------------------------------------------
 // Purpose: 
