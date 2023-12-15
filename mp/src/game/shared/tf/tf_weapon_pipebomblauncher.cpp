@@ -27,8 +27,8 @@
 extern ConVar tf_grenadelauncher_livetime;
 
 // hard code these eventually
-#define TF_PIPEBOMB_MIN_CHARGE_VEL 900
-#define TF_PIPEBOMB_MAX_CHARGE_VEL 2400
+#define TF_PIPEBOMB_MIN_CHARGE_VEL 2400
+#define TF_PIPEBOMB_MAX_CHARGE_VEL 4000
 #define TF_PIPEBOMB_MAX_CHARGE_TIME 4.0f
 
 //=============================================================================
