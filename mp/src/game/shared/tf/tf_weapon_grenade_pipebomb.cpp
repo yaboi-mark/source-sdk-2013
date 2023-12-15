@@ -290,7 +290,7 @@ CTFGrenadePipebombProjectile* CTFGrenadePipebombProjectile::Create( const Vector
 		pGrenade->SetPipebombMode( bRemoteDetonate );
 		DispatchSpawn( pGrenade );
 
-		int flSpread = 100;
+		int flSpread = weaponInfo.GetWeaponData(TF_WEAPON_PRIMARY_MODE).m_flSpread;
 		
 		Vector randomSpread (RandomFloat( -flSpread, flSpread ),RandomFloat( -flSpread, flSpread ),RandomFloat( -flSpread, flSpread ));
 
