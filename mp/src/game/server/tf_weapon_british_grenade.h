@@ -11,7 +11,7 @@
 #pragma once
 #endif
 
-#include "tf_weaponbase_gun.h"
+#include "tf_weapon_grenadelauncher.h"
 
 #if defined( CLIENT_DLL )
 #define CTFBritishGrenade C_TFBritishGrenade
@@ -30,11 +30,11 @@ enum
 //
 // Shotgun class.
 //
-class CTFBritishGrenade : public CTFWeaponBaseGun
+class CTFBritishGrenade : public CTFGrenadeLauncher
 {
 public:
 
-	DECLARE_CLASS(CTFBritishGrenade, CTFWeaponBaseGun);
+	DECLARE_CLASS(CTFBritishGrenade, CTFGrenadeLauncher);
 	DECLARE_NETWORKCLASS();
 	DECLARE_PREDICTABLE();
 
@@ -43,6 +43,7 @@ public:
 	virtual int		GetWeaponID(void) const			{ return TF_WEAPON_BRITISH_GRENADE; }
 	virtual void	PrimaryAttack();
 	virtual void SecondaryAttack();
+	void LaunchGrenade(void);
 
 protected:
 

@@ -15,6 +15,7 @@
 // Server specific.
 #else
 #include "tf_player.h"
+#include "tf_gamestats.h"
 #endif
 
 #define CREATE_SIMPLE_WEAPON_TABLE( WpnName, entityname )			\
@@ -100,4 +101,40 @@ void CTFBritishGrenade::SecondaryAttack(void)
 	m_iWeaponMode = TF_WEAPON_SECONDARY_MODE;
 
 	BaseClass::SecondaryAttack();
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void CTFBritishGrenade::LaunchGrenade(void)
+{
+	// Get the player owning the weapon.
+	CTFPlayer *pPlayer = ToTFPlayer(GetPlayerOwner());
+	if (!pPlayer)
+		return;
+
+	CalcIsAttackCritical();
+
+	SendWeaponAnim(ACT_VM_PRIMARYATTACK);
+
+	pPlayer->SetAnimation(PLAYER_ATTACK1);
+	pPlayer->DoAnimationEvent(PLAYERANIMEVENT_ATTACK_PRIMARY);
+
+	FireProjectile(pPlayer);
+
+#if !defined( CLIENT_DLL ) 
+	pPlayer->SpeakWeaponFire();
+	CTF_GameStats.Event_PlayerFiredWeapon(pPlayer, IsCurrentAttackACrit());
+#endif
+
+	// Set next attack times.
+	m_flNextPrimaryAttack = gpGlobals->curtime + m_pWeaponInfo->GetWeaponData(m_iWeaponMode).m_flTimeFireDelay;
+
+	SetWeaponIdleTime(gpGlobals->curtime + SequenceDuration());
+
+	// Check the reload mode and behave appropriately.
+	if (m_bReloadsSingly)
+	{
+		m_iReloadMode.Set(TF_RELOAD_START);
+	}
 }

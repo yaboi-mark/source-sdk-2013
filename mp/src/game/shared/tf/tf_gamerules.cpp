@@ -213,6 +213,9 @@ BEGIN_DATADESC( CTFGameRulesProxy )
 	DEFINE_INPUTFUNC( FIELD_STRING, "SetBlueTeamGoalString", InputSetBlueTeamGoalString ),
 	DEFINE_INPUTFUNC( FIELD_INTEGER, "SetRedTeamRole", InputSetRedTeamRole ),
 	DEFINE_INPUTFUNC( FIELD_INTEGER, "SetBlueTeamRole", InputSetBlueTeamRole ),
+
+	//DEFINE_OUTPUT( m_outputOnRedWinCtf, "OnRedWinCtf" ),
+	//DEFINE_OUTPUT( m_outputOnBlueWinCtf, "OnBlueWinCtf" ),
 END_DATADESC()
 
 //-----------------------------------------------------------------------------
@@ -1242,7 +1245,8 @@ void CTFGameRules::RadiusDamage( const CTakeDamageInfo &info, const Vector &vecS
 
 			if ( iMaxCaps != -1 && pMaxTeam != NULL )
 			{
-				SetWinningTeam( pMaxTeam->GetTeamNumber(), WINREASON_FLAG_CAPTURE_LIMIT );
+				SetWinningTeam( pMaxTeam->GetTeamNumber(), WINREASON_FLAG_CAPTURE_LIMIT ); // THIS IS THE LINE THAT CAUSES THE WIN FOR CTF. I AM BASICALLY BOOKMARKING THIS FOR LATER. ASDFGHJKL
+				//m_outputOnRedWinCtf.FireOutput( this, this );
 				return true;
 			}
 		}
