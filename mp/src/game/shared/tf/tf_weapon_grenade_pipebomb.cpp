@@ -281,7 +281,7 @@ PRECACHE_WEAPON_REGISTER( tf_projectile_pipe );
 //-----------------------------------------------------------------------------
 CTFGrenadePipebombProjectile* CTFGrenadePipebombProjectile::Create( const Vector &position, const QAngle &angles, 
 																    const Vector &velocity, const AngularImpulse &angVelocity, 
-																    CBaseCombatCharacter *pOwner, const CTFWeaponInfo &weaponInfo, bool bRemoteDetonate, bool hasSpread )
+																    CBaseCombatCharacter *pOwner, const CTFWeaponInfo &weaponInfo, bool bRemoteDetonate )
 {
 	CTFGrenadePipebombProjectile *pGrenade = static_cast<CTFGrenadePipebombProjectile*>( CBaseEntity::CreateNoSpawn( bRemoteDetonate ? "tf_projectile_pipe_remote" : "tf_projectile_pipe", position, angles, pOwner ) );
 	if ( pGrenade )
@@ -290,11 +290,10 @@ CTFGrenadePipebombProjectile* CTFGrenadePipebombProjectile::Create( const Vector
 		pGrenade->SetPipebombMode( bRemoteDetonate );
 		DispatchSpawn( pGrenade );
 
-		int flSpread = weaponInfo.GetWeaponData(TF_WEAPON_PRIMARY_MODE).m_flSpread;
-		
-		Vector randomSpread (RandomFloat( -flSpread, flSpread ),RandomFloat( -flSpread, flSpread ),RandomFloat( -flSpread, flSpread ));
+		pGrenade->m_flFuseDuration = weaponInfo.GetWeaponData(TF_WEAPON_PRIMARY_MODE).m_flFuseTime;
+		pGrenade->SetDetonateTimerLength(pGrenade->m_flFuseDuration);
 
-		pGrenade->InitGrenade( velocity + randomSpread, angVelocity, pOwner, weaponInfo );
+		pGrenade->InitGrenade( velocity, angVelocity, pOwner, weaponInfo );
 
 #ifdef _X360 
 		if ( pGrenade->m_iType != TF_GL_MODE_REMOTE_DETONATE )
@@ -326,12 +325,12 @@ void CTFGrenadePipebombProjectile::Spawn()
 	{
 		// Set this to max, so effectively they do not self-implode.
 		SetModel( TF_WEAPON_PIPEBOMB_MODEL );
-		SetDetonateTimerLength( FLT_MAX );
+		//SetDetonateTimerLength( 1 );
 	}
 	else
 	{
 		SetModel( TF_WEAPON_PIPEGRENADE_MODEL );
-		SetDetonateTimerLength( TF_WEAPON_GRENADE_DETONATE_TIME );
+		//SetDetonateTimerLength( 1 );
 		SetTouch( &CTFGrenadePipebombProjectile::PipebombTouch );
 	}
 

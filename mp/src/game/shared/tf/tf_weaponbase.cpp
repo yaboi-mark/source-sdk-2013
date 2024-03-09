@@ -673,7 +673,7 @@ bool CTFWeaponBase::ReloadSingly( void )
 			if ( pPlayer->GetAmmoCount( m_iPrimaryAmmoType ) > 0 && !m_bReloadedThroughAnimEvent )
 			{
 				m_iClip1 = min( ( m_iClip1 + 1 ), GetMaxClip1() );
-				pPlayer->RemoveAmmo( 1, m_iPrimaryAmmoType );
+				//pPlayer->RemoveAmmo( 1, m_iPrimaryAmmoType );
 			}
 
 			if ( Clip1() == GetMaxClip1() || pPlayer->GetAmmoCount( m_iPrimaryAmmoType ) <= 0 )
@@ -719,7 +719,7 @@ void CTFWeaponBase::Operator_HandleAnimEvent( animevent_t *pEvent, CBaseCombatCh
 			if ( pOperator->GetAmmoCount( m_iPrimaryAmmoType ) > 0 && !m_bReloadedThroughAnimEvent )
 			{
 				m_iClip1 = min( ( m_iClip1 + 1 ), GetMaxClip1() );
-				pOperator->RemoveAmmo( 1, m_iPrimaryAmmoType );
+				//pOperator->RemoveAmmo( 1, m_iPrimaryAmmoType );
 			}
 
 			m_bReloadedThroughAnimEvent = true;
@@ -812,7 +812,7 @@ bool CTFWeaponBase::DefaultReload( int iClipSize1, int iClipSize2, int iActivity
 			if ( pPlayer->GetAmmoCount( m_iPrimaryAmmoType ) > 0 && !m_bReloadedThroughAnimEvent )
 			{
 				int ammochange = min(GetMaxClip1() - m_iClip1, pPlayer->GetAmmoCount(m_iPrimaryAmmoType));
-				pPlayer->RemoveAmmo(ammochange, m_iPrimaryAmmoType);
+				//pPlayer->RemoveAmmo(ammochange, m_iPrimaryAmmoType);
 				m_iClip1 += ammochange;
 			}
 
@@ -2151,7 +2151,7 @@ bool CTFWeaponBase::OnFireEvent( C_BaseViewModel *pViewModel, const Vector& orig
 		if ( pPlayer && pPlayer->GetAmmoCount( m_iPrimaryAmmoType ) > 0 && !m_bReloadedThroughAnimEvent )
 		{
 			m_iClip1 = min( ( m_iClip1 + 1 ), GetMaxClip1() );
-			pPlayer->RemoveAmmo( 1, m_iPrimaryAmmoType );
+			//pPlayer->RemoveAmmo( 1, m_iPrimaryAmmoType );
 		}
 
 		m_bReloadedThroughAnimEvent = true;

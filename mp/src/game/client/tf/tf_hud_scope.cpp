@@ -205,6 +205,7 @@ void CHudScope::ApplySchemeSettings( vgui::IScheme *scheme )
 //-----------------------------------------------------------------------------
 bool CHudScope::ShouldDraw( void )
 {
+	return false;
 	// Because our spectator gui is drawn before this in the viewport hierarchy 
 	// don't draw the scope ring and refraction when in spectator
 	if ( GetSpectatorTarget() != 0 && GetSpectatorMode() == OBS_MODE_IN_EYE )

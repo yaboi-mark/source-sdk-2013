@@ -179,7 +179,7 @@ void CTFGrenadeLauncher::LaunchGrenade( void )
 
 float CTFGrenadeLauncher::GetProjectileSpeed( void )
 {
-	return TF_GRENADE_LAUNCER_MIN_VEL;
+	return m_pWeaponInfo->GetWeaponData(m_iWeaponMode).m_flProjectileSpeed;
 }
 
 //-----------------------------------------------------------------------------

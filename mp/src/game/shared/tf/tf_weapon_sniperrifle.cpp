@@ -352,7 +352,7 @@ void CTFSniperRifle::Zoom( void )
 	CTFPlayer *pPlayer = GetTFPlayerOwner();
 	if ( pPlayer && pPlayer->m_Shared.IsJumping() )
 	{
-		if ( pPlayer->GetFOV() >= 75 )
+		if ( IsZoomed() )
 			return;
 	}
 
