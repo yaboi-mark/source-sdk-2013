@@ -61,10 +61,5 @@ extern ConVar tea_overspeed_friction;
 extern ConVar tea_airdash_zvel_influence_horizontal_dampening;
 extern ConVar tea_flagcarrier_universal_accelerate_multiplier;
 extern ConVar tea_flagcarrier_bhop_dampen_multiplier;
-extern ConVar tea_overspeed_decreaseresist;
-extern ConVar tea_overspeed_start;
-extern ConVar tea_slide_speed;
-extern ConVar tea_slide_accelerate;
-extern ConVar tea_slide_jumpboost;
 
 #endif // MOVEVARS_SHARED_H

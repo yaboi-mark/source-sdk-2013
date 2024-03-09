@@ -579,7 +579,6 @@ public:
 	CNetworkVar( int, m_iWorldModelIndex );
 	// Sounds
 	float					m_flNextEmptySoundTime;				// delay on empty sound playing
-	float					m_flLastWeaponFireTime;				// time of last fire call
 
 	Activity				GetIdealActivity( void ) { return m_IdealActivity; }
 	int						GetIdealSequence( void ) { return m_nIdealSequence; }

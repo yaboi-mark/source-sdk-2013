@@ -149,10 +149,30 @@ void CTFPipebombLauncher::PrimaryAttack( void )
 		return;
 
 	if ( !CanAttack() )
+	{
+		m_flChargeBeginTime = 0;
 		return;
+	}
 
-	m_iWeaponMode = TF_WEAPON_PRIMARY_MODE;
-	LaunchGrenade();
+	if ( m_flChargeBeginTime <= 0 )
+	{
+		// Set the weapon mode.
+		m_iWeaponMode = TF_WEAPON_PRIMARY_MODE;
+
+		// save that we had the attack button down
+		m_flChargeBeginTime = gpGlobals->curtime;
+
+		SendWeaponAnim( ACT_VM_PULLBACK );
+	}
+	else
+	{
+		float flTotalChargeTime = gpGlobals->curtime - m_flChargeBeginTime;
+
+		if ( flTotalChargeTime >= TF_PIPEBOMB_MAX_CHARGE_TIME )
+		{
+			LaunchGrenade();
+		}
+	}
 }
 
 //-----------------------------------------------------------------------------
@@ -292,44 +312,10 @@ void CTFPipebombLauncher::ItemBusyFrame( void )
 //-----------------------------------------------------------------------------
 void CTFPipebombLauncher::SecondaryAttack( void )
 {
-	// Check for ammunition.
-	if (m_iClip1 <= 0 && m_iClip1 != -1)
+	if ( !CanAttack() )
 		return;
 
-	// Are we capable of firing again?
-	if (m_flNextPrimaryAttack > gpGlobals->curtime)
-		return;
-
-	if (!CanAttack())
-	{
-		m_flChargeBeginTime = 0;
-		return;
-	}
-
-	if (m_flChargeBeginTime <= 0)
-	{
-		// Set the weapon mode.
-		m_iWeaponMode = TF_WEAPON_SECONDARY_MODE;
-
-		// save that we had the attack button down
-		m_flChargeBeginTime = gpGlobals->curtime;
-
-		SendWeaponAnim(ACT_VM_PULLBACK);
-	}
-	else
-	{
-		float flTotalChargeTime = gpGlobals->curtime - m_flChargeBeginTime;
-
-		if (flTotalChargeTime >= TF_PIPEBOMB_MAX_CHARGE_TIME)
-		{
-			LaunchGrenade();
-		}
-	}
-
-	/*if ( !CanAttack() ) // we don't have manual detonation- our secondary fire is the charge attack instead.
-		return;
-
-	if ( m_iPipebombCount ) 
+	if ( m_iPipebombCount )
 	{
 		// Get a valid player.
 		CTFPlayer *pPlayer = ToTFPlayer( GetOwner() );
@@ -352,7 +338,7 @@ void CTFPipebombLauncher::SecondaryAttack( void )
 			// Play a detonate sound.
 			WeaponSound( SPECIAL3 );
 		}
-	}*/
+	}
 }
 
 //=============================================================================

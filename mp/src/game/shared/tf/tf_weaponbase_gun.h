@@ -54,20 +54,19 @@ public:
 	void FireBullet( CTFPlayer *pPlayer );
 	CBaseEntity *FireRocket( CTFPlayer *pPlayer );
 	CBaseEntity *FireNail( CTFPlayer *pPlayer, int iSpecificNail );
-	CBaseEntity *FirePipeBomb( CTFPlayer *pPlayer, bool bRemoteDetonate );
+	CBaseEntity *FirePipeBomb( CTFPlayer *pPlayer, bool bRemoteDetonate, bool hasSpread );
 
 	virtual float GetWeaponSpread( void );
 	virtual float GetProjectileSpeed( void );
 
-	void UpdatePunchAngles(CTFPlayer *pPlayer);
-	void Think( void );
+	void UpdatePunchAngles( CTFPlayer *pPlayer );
 	virtual float GetProjectileDamage( void );
 
 	virtual void ZoomIn( void );
 	virtual void ZoomOut( void );
 	void ZoomOutIn( void );
 
-	virtual void PlayWeaponShootSound(void);
+	virtual void PlayWeaponShootSound( void );
 
 private:
 

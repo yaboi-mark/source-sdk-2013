@@ -50,7 +50,7 @@ public:
 
 	virtual bool	Holster( CBaseCombatWeapon *pSwitchingTo );
 	virtual bool	Deploy( void );
-	virtual void	PrimaryAttack(void);
+	virtual void	PrimaryAttack( void );
 	virtual void	WeaponIdle( void );
 	virtual float	GetProjectileSpeed( void );
 	virtual bool	Reload( void );

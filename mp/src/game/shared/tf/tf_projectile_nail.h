@@ -25,7 +25,7 @@ public:
 	~CTFProjectile_Syringe();
 
 	// Creation.
-	static CTFProjectile_Syringe *Create( const Vector &vecOrigin, const QAngle &vecAngles, CBaseEntity *pOwner = NULL, CBaseEntity *pScorer = NULL, bool bCritical = false, float speed = 0 );	
+	static CTFProjectile_Syringe *Create( const Vector &vecOrigin, const QAngle &vecAngles, CBaseEntity *pOwner = NULL, CBaseEntity *pScorer = NULL, bool bCritical = false );	
 
 	virtual const char *GetProjectileModelName( void );
 	virtual float GetGravity( void );

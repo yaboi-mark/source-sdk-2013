@@ -33,7 +33,7 @@ RecvPropQAngles( RECVINFO_NAME( m_angNetworkAngles, m_angRotation ) ),
 
 // Server specific.
 #else
-SendPropVector( SENDINFO( m_vInitialVelocity ), 12 /*nbits*/, 0 /*flags*/, -69420 /*low value*/, 69420 /*high value*/	),
+SendPropVector( SENDINFO( m_vInitialVelocity ), 12 /*nbits*/, 0 /*flags*/, -3000 /*low value*/, 3000 /*high value*/	),
 
 SendPropExclude( "DT_BaseEntity", "m_vecOrigin" ),
 SendPropExclude( "DT_BaseEntity", "m_angRotation" ),
@@ -202,7 +202,7 @@ int CTFBaseRocket::DrawModel( int flags )
 // Purpose: 
 //-----------------------------------------------------------------------------
 CTFBaseRocket *CTFBaseRocket::Create( const char *pszClassname, const Vector &vecOrigin, 
-									  const QAngle &vecAngles, CBaseEntity *pOwner, float speed )
+									  const QAngle &vecAngles, CBaseEntity *pOwner )
 {
 	CTFBaseRocket *pRocket = static_cast<CTFBaseRocket*>( CBaseEntity::Create( pszClassname, vecOrigin, vecAngles, pOwner ) );
 	if ( !pRocket )
@@ -218,7 +218,7 @@ CTFBaseRocket *CTFBaseRocket::Create( const char *pszClassname, const Vector &ve
 	Vector vecForward, vecRight, vecUp;
 	AngleVectors( vecAngles, &vecForward, &vecRight, &vecUp );
 
-	Vector vecVelocity = vecForward * speed;
+	Vector vecVelocity = vecForward * 3000.0f;
 	pRocket->SetAbsVelocity( vecVelocity );	
 	pRocket->SetupInitialTransmittedGrenadeVelocity( vecVelocity );
 

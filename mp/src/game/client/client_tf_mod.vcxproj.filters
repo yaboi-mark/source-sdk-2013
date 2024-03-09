@@ -2165,9 +2165,6 @@
     <ClInclude Include="..\server\tf_weapon_british_grenade.h">
       <Filter>Source Files\TF\Weapon</Filter>
     </ClInclude>
-    <ClInclude Include="tf_weapon_garand.h">
-      <Filter>Source Files\TF\Weapon</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="mp3player.cpp">
@@ -3884,9 +3881,6 @@
       <Filter>Source Files\TF\Weapon</Filter>
     </ClCompile>
     <ClCompile Include="..\server\tf_weapon_british_grenade.cpp">
-      <Filter>Source Files\TF\Weapon</Filter>
-    </ClCompile>
-    <ClCompile Include="tf_weapon_garand.cpp">
       <Filter>Source Files\TF\Weapon</Filter>
     </ClCompile>
   </ItemGroup>

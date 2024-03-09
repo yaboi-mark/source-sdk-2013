@@ -1202,7 +1202,7 @@ void CGameMovement::FinishMove( void )
 	mv->m_nOldButtons = mv->m_nButtons;
 }
 
-#define PUNCH_DAMPING		8.0f		// bigger number makes the response more damped, smaller is less damped
+#define PUNCH_DAMPING		9.0f		// bigger number makes the response more damped, smaller is less damped
 										// currently the system will overshoot, with larger damping values it won't
 #define PUNCH_SPRING_CONSTANT	65.0f	// bigger number increases the speed at which the view corrects
 
@@ -1214,19 +1214,8 @@ void CGameMovement::DecayPunchAngle( void )
 {
 	if ( player->m_Local.m_vecPunchAngle->LengthSqr() > 0.001 || player->m_Local.m_vecPunchAngleVel->LengthSqr() > 0.001 )
 	{
-#ifdef CLIENT_DLL
-		C_BaseCombatWeapon *weapon = player->GetActiveWeapon();
-#else
-		CBaseCombatWeapon *weapon = player->GetActiveWeapon();
-#endif
-		float timeSinceShot = 1;
-		if (weapon) {
-			timeSinceShot = weapon->m_flLastWeaponFireTime;
-		}
-
-		float timeStrength = pow(MAX(MIN(gpGlobals->curtime - (timeSinceShot), 1), 0), 1);
-		player->m_Local.m_vecPunchAngle += player->m_Local.m_vecPunchAngleVel * gpGlobals->frametime * timeStrength;
-		float damping = 1 - PUNCH_DAMPING * gpGlobals->frametime * timeStrength;
+		player->m_Local.m_vecPunchAngle += player->m_Local.m_vecPunchAngleVel * gpGlobals->frametime;
+		float damping = 1 - (PUNCH_DAMPING * gpGlobals->frametime);
 		
 		if ( damping < 0 )
 		{
@@ -1236,9 +1225,8 @@ void CGameMovement::DecayPunchAngle( void )
 		 
 		// torsional spring
 		// UNDONE: Per-axis spring constant?
-		float springForceMagnitude = PUNCH_SPRING_CONSTANT * timeStrength * gpGlobals->frametime;
-		springForceMagnitude = clamp(springForceMagnitude, 0.f, 2.f);
-		player->m_Local.m_vecPunchAngle += player->m_Local.m_vecPunchAngleVel * gpGlobals->frametime * timeStrength;
+		float springForceMagnitude = PUNCH_SPRING_CONSTANT * gpGlobals->frametime;
+		springForceMagnitude = clamp(springForceMagnitude, 0.f, 2.f );
 		player->m_Local.m_vecPunchAngleVel -= player->m_Local.m_vecPunchAngle * springForceMagnitude;
 
 		// don't wrap around
@@ -1645,12 +1633,7 @@ void CGameMovement::Friction( void )
 	// apply ground friction
 	if (player->GetGroundEntity() != NULL)  // On an entity that is the ground
 	{
-		if (speed > mv->m_flMaxSpeed * tea_overspeed_start.GetFloat()) {
-			friction = tea_overspeed_friction.GetFloat() * player->m_surfaceFriction;
-		}
-		else {
-			friction = sv_friction.GetFloat() * player->m_surfaceFriction;
-		}
+		friction = sv_friction.GetFloat() * player->m_surfaceFriction;
 
 		// Bleed off some speed, but if we have less than the bleed
 		//  threshold, bleed the threshold amount.
@@ -4375,7 +4358,7 @@ void CGameMovement::Duck( void )
 		return;
 
 	// Slow down ducked players.
-	//HandleDuckingSpeedCrop();
+	HandleDuckingSpeedCrop();
 
 	// If the player is holding down the duck button, the player is in duck transition, ducking, or duck-jumping.
 	if ( ( mv->m_nButtons & IN_DUCK ) || player->m_Local.m_bDucking  || bInDuck || bDuckJump )

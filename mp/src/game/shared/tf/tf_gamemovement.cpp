@@ -58,7 +58,6 @@ public:
 	virtual void FullWalkMove();
 	virtual void WalkMove( void );
 	virtual void AirMove( void );
-	virtual void SlideMove();
 	virtual void FullTossMove( void );
 	virtual void CategorizePosition( void );
 	virtual void CheckFalling( void );
@@ -103,7 +102,6 @@ EXPOSE_SINGLE_INTERFACE_GLOBALVAR(CGameMovement, IGameMovement,INTERFACENAME_GAM
 CTFGameMovement::CTFGameMovement()
 {
 	m_pTFPlayer = NULL;
-	player->PrecacheScriptSound("Player.Slide");
 }
 
 //---------------------------------------------------------------------------------------- 
@@ -284,7 +282,8 @@ bool CTFGameMovement::CheckWaterJumpButton( void )
 void CTFGameMovement::AirDash( void )
 {
 	// Apply approx. the jump velocity added to an air dash.
-	float flDashZ = sqrt( 2.0 * sv_gravity.GetFloat() * GAMEMOVEMENT_JUMP_HEIGHT );
+	Assert( sv_gravity.GetFloat() == 600.0f );
+	float flDashZ = 268.3281572999747f;
 
 	// Get the wish direction.
 	Vector vecForward, vecRight;
@@ -293,15 +292,10 @@ void CTFGameMovement::AirDash( void )
 	vecRight.z = 0.0f;		
 	VectorNormalize( vecForward );
 	VectorNormalize( vecRight );
-	float preVertical = abs( mv->m_vecVelocity.z );
 
 	mv->m_vecVelocity.z *= tea_airdash_zvel_influence.GetFloat() * tea_airdash_zvel_influence_horizontal_dampening.GetFloat();
 
 	float preSpeed = VectorLength(mv->m_vecVelocity);
-
-	if (mv->m_vecVelocity.z != 0) {
-		preSpeed += preVertical * ( 1 - tea_airdash_zvel_influence_horizontal_dampening.GetFloat() );
-	}
 
 
 	// Copy movement amounts
@@ -366,7 +360,7 @@ bool CTFGameMovement::CheckJumpButton()
 	bool bAirDash = false;
 	bool bOnGround = ( player->GetGroundEntity() != NULL );
 
-	// Cannot jump will ducked. // not anymore
+	// Cannot jump will ducked. //bro type owed
 	/*if ( player->GetFlags() & FL_DUCKING )
 	{
 		// Let a scout do it.
@@ -374,15 +368,15 @@ bool CTFGameMovement::CheckJumpButton()
 
 		if ( !bAllow )
 			return false;
-	}
+	}*/
 
 	// Cannot jump while in the unduck transition.
 	if ( ( player->m_Local.m_bDucking && (  player->GetFlags() & FL_DUCKING ) ) || ( player->m_Local.m_flDuckJumpTime > 0.0f ) )
 		return false;
 
 	// Cannot jump again until the jump button has been released. // I HAVE COMMENTED THIS OUT SO WE CAN BHOP
-	if ( mv->m_nOldButtons & IN_JUMP )
-		return false;*/
+	//if ( mv->m_nOldButtons & IN_JUMP )
+	//	return false;
 
 	// In air, so ignore jumps (unless you are a scout).
 	if ( !bOnGround)
@@ -429,12 +423,9 @@ bool CTFGameMovement::CheckJumpButton()
 		flGroundFactor = player->m_pSurfaceData->game.jumpFactor; 
 	}
 
-	if ( mv->m_nButtons & IN_DUCK ) {
-		flGroundFactor *= tea_slide_jumpboost.GetFloat();
-	}
-
 	// fMul = sqrt( 2.0 * gravity * jump_height (21.0units) ) * GroundFactor
-	float flMul = sqrt( 2.0 * sv_gravity.GetFloat() * GAMEMOVEMENT_JUMP_HEIGHT * flGroundFactor );
+	Assert( sv_gravity.GetFloat() == 600.0f );
+	float flMul = 268.3281572999747f * flGroundFactor;
 
 	// Save the current z velocity.
 	float flStartZ = mv->m_vecVelocity[2];
@@ -757,6 +748,32 @@ void CTFGameMovement::WalkMove( void )
 		mv->m_vecVelocity.y *= flScale;
 	}
 
+	// Now reduce their backwards speed to some percent of max, if they are travelling backwards
+	// unless they are under some minimum, to not penalize deployed snipers or heavies
+	if ( tf_clamp_back_speed.GetFloat() < 1.0 && VectorLength( mv->m_vecVelocity ) > tf_clamp_back_speed_min.GetFloat() )
+	{
+		float flDot = DotProduct( vecForward, mv->m_vecVelocity );
+
+		// are we moving backwards at all?
+		if ( flDot < 0 )
+		{
+			Vector vecBackMove = vecForward * flDot;
+			Vector vecRightMove = vecRight * DotProduct( vecRight, mv->m_vecVelocity );
+
+			// clamp the back move vector if it is faster than max
+			float flBackSpeed = VectorLength( vecBackMove );
+			float flMaxBackSpeed = ( mv->m_flMaxSpeed * tf_clamp_back_speed.GetFloat() );
+
+			if ( flBackSpeed > flMaxBackSpeed )
+			{
+				vecBackMove *= flMaxBackSpeed / flBackSpeed;
+			}
+			
+			// reassemble velocity	
+			mv->m_vecVelocity = vecBackMove + vecRightMove;
+		}
+	}
+
 	// Add base velocity to the player's current velocity - base velocity = velocity from conveyors, etc.
 	VectorAdd( mv->m_vecVelocity, player->GetBaseVelocity(), mv->m_vecVelocity );
 
@@ -809,13 +826,18 @@ void CTFGameMovement::WalkMove( void )
 	// StayOnGround();
 
 	// Debugging!!!
-	/*Vector vecTestVelocity = mv->m_vecVelocity;
+	Vector vecTestVelocity = mv->m_vecVelocity;
 	vecTestVelocity.z = 0.0f;
 	float flTestSpeed = VectorLength( vecTestVelocity );
 	if ( baseVelocity.IsZero() && ( flTestSpeed > ( mv->m_flMaxSpeed + 1.0f ) ) )
 	{
 		Msg( "Step Max Speed < %f\n", flTestSpeed );
-	}*/
+	}
+
+	if ( tf_showspeed.GetBool() )
+	{
+		Msg( "Speed=%f\n", flTestSpeed );
+	}
 
 }
 
@@ -865,7 +887,7 @@ void CTFGameMovement::AirMove( void )
 	}
 
 	if ( tea_movementmode.GetInt() == 1 || tea_movementmode.GetInt() == 2 ) AirAccelerate( wishdir, wishspeed, tea_q3accelerate.GetFloat() * flagmult, mv->m_flMaxSpeed );
-	if ( tea_movementmode.GetInt() == 0 || tea_movementmode.GetInt() == 2 ) AirAccelerate( wishdir, wishspeed, sv_airaccelerate.GetFloat() * flagmult, 0.1 * mv->m_flMaxSpeed );
+	if ( tea_movementmode.GetInt() == 0 || tea_movementmode.GetInt() == 2 ) AirAccelerate(wishdir, wishspeed, sv_airaccelerate.GetFloat() * flagmult, 30);
 
 	// Add in any base velocity to the current velocity.
 	VectorAdd( mv->m_vecVelocity, player->GetBaseVelocity(), mv->m_vecVelocity );
@@ -1165,12 +1187,12 @@ void CTFGameMovement::CheckFalling( void )
 //-----------------------------------------------------------------------------
 void CTFGameMovement::Duck( void )
 {
-	// Don't allowing ducking in water. // counterargument
-	/*if ( ( ( player->GetWaterLevel() >= WL_Feet ) && ( player->GetGroundEntity() == NULL ) ) ||
+	// Don't allowing ducking in water.
+	if ( ( ( player->GetWaterLevel() >= WL_Feet ) && ( player->GetGroundEntity() == NULL ) ) ||
 		 player->GetWaterLevel() >= WL_Eyes )
 	{
 		mv->m_nButtons &= ~IN_DUCK;
-	}*/
+	}
 
 	BaseClass::Duck();
 }
@@ -1227,12 +1249,6 @@ void CTFGameMovement::FullWalkMove()
 		WaterJump();
 		TryPlayerMove();
 		CheckWater();
-		Vector testSpeed = mv->m_vecVelocity;
-		testSpeed.z = 0;
-		if (tf_showspeed.GetBool())
-		{
-			Msg("%f\n", round(VectorLength(testSpeed)));
-		}
 		return;
 	}
 
@@ -1241,12 +1257,6 @@ void CTFGameMovement::FullWalkMove()
 	if ( InWater() ) 
 	{
 		FullWalkMoveUnderwater();
-		Vector testSpeed = mv->m_vecVelocity;
-		testSpeed.z = 0;
-		if (tf_showspeed.GetBool())
-		{
-			Msg("%f\n", round(VectorLength(testSpeed)));
-		}
 		return;
 	}
 
@@ -1264,25 +1274,9 @@ void CTFGameMovement::FullWalkMove()
 
 	if (player->GetGroundEntity() != NULL)
 	{
-		if ( mv->m_nButtons & IN_DUCK ) {
-			SlideMove();
-		}
-		else {
-			if ( mv->m_nOldButtons & IN_DUCK )
-				player->StopSound("Player.Slide");
-			mv->m_vecVelocity[2] = 0.0;
-			float flOldSpeed = VectorLength(mv->m_vecVelocity);
-			Friction();
-			WalkMove();
-			float flNewSpeed = VectorLength(mv->m_vecVelocity);
-			if (flNewSpeed < flOldSpeed && flOldSpeed > mv->m_flMaxSpeed * tea_overspeed_start.GetFloat())
-			{
-				float flGoalSpeed = flOldSpeed * tea_overspeed_decreaseresist.GetFloat() + flNewSpeed * (1 - tea_overspeed_decreaseresist.GetFloat());
-				float flScale = (flGoalSpeed / flNewSpeed);
-				mv->m_vecVelocity.x *= flScale;
-				mv->m_vecVelocity.y *= flScale;
-			}
-		}
+		mv->m_vecVelocity[2] = 0.0;
+		Friction();
+		WalkMove();
 	}
 	else
 	{
@@ -1309,98 +1303,6 @@ void CTFGameMovement::FullWalkMove()
 
 	// Make sure velocity is valid.
 	CheckVelocity();
-	Vector testSpeed = mv->m_vecVelocity;
-	testSpeed.z = 0;
-	if (tf_showspeed.GetBool())
-	{
-		Msg("%f\n", round(VectorLength(testSpeed)));
-	}
-}
-
-void CTFGameMovement::SlideMove(void) {
-	if ( player->m_Local.m_bDucking ) {
-		// Get the movement angles.
-		Vector vecForward, vecRight, vecUp;
-		AngleVectors(mv->m_vecViewAngles, &vecForward, &vecRight, &vecUp);
-		vecForward.z = 0.0f;
-		vecRight.z = 0.0f;
-		VectorNormalize(vecForward);
-		VectorNormalize(vecRight);
-
-		// Copy movement amounts
-		float flForwardMove = mv->m_flForwardMove;
-		float flSideMove = mv->m_flSideMove;
-
-		if ( flForwardMove == 0 && flSideMove == 0 ) {
-			flForwardMove = 1;
-		}
-
-		// Find the direction,velocity in the x,y plane.
-		Vector vecWishDirection(((vecForward.x * flForwardMove) + (vecRight.x * flSideMove)),
-			((vecForward.y * flForwardMove) + (vecRight.y * flSideMove)),
-			0.0f);
-
-		mv->m_vecVelocity = (vecWishDirection / VectorLength(vecWishDirection)) * VectorLength(mv->m_vecVelocity);
-		MoveHelper()->StartSound(mv->GetAbsOrigin(), "Player.Slide");
-	}
-	else {
-		// Get the movement angles.
-		Vector vecTarget = mv->m_vecVelocity;
-		vecTarget.z = 0.0f;
-		VectorNormalize(vecTarget);
-
-		// Accelerate in the x,y plane.
-		mv->m_vecVelocity.z = 0;
-		Accelerate(vecTarget, mv->m_flMaxSpeed * tea_slide_speed.GetFloat(), tea_slide_accelerate.GetFloat());
-		Assert(mv->m_vecVelocity.z == 0.0f);
-	}
-
-	// Add base velocity to the player's current velocity - base velocity = velocity from conveyors, etc.
-	VectorAdd(mv->m_vecVelocity, player->GetBaseVelocity(), mv->m_vecVelocity);
-
-	// Calculate the current speed and return if we are not really moving.
-	float flSpeed = VectorLength(mv->m_vecVelocity);
-	if (flSpeed < 1.0f)
-	{
-		// I didn't remove the base velocity here since it wasn't moving us in the first place.
-		mv->m_vecVelocity.Init();
-		return;
-	}
-
-	// Calculate the destination.
-	Vector vecDestination;
-	vecDestination.x = mv->GetAbsOrigin().x + (mv->m_vecVelocity.x * gpGlobals->frametime);
-	vecDestination.y = mv->GetAbsOrigin().y + (mv->m_vecVelocity.y * gpGlobals->frametime);
-	vecDestination.z = mv->GetAbsOrigin().z;
-
-	// Try moving to the destination.
-	trace_t trace;
-	TracePlayerBBox(mv->GetAbsOrigin(), vecDestination, PlayerSolidMask(), COLLISION_GROUP_PLAYER_MOVEMENT, trace);
-	if (trace.fraction == 1.0f)
-	{
-		// Made it to the destination (remove the base velocity).
-		mv->SetAbsOrigin(trace.endpos);
-		VectorSubtract(mv->m_vecVelocity, player->GetBaseVelocity(), mv->m_vecVelocity);
-
-		// Save the wish velocity.
-		mv->m_outWishVel += (mv->m_vecVelocity);
-
-		// Try and keep the player on the ground.
-		// NOTE YWB 7/5/07: Don't do this here, our version of CategorizePosition encompasses this test
-		// StayOnGround();
-
-		return;
-	}
-
-	// Now try and do a step move.
-	StepMove(vecDestination, trace);
-
-	// Remove base velocity.
-	Vector baseVelocity = player->GetBaseVelocity();
-	VectorSubtract(mv->m_vecVelocity, baseVelocity, mv->m_vecVelocity);
-
-	// Save the wish velocity.
-	mv->m_outWishVel += (mv->m_vecVelocity);
 }
 
 //-----------------------------------------------------------------------------

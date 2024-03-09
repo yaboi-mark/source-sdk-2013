@@ -44,7 +44,6 @@ public:
 	float		m_flChargeTime;
 	bool		m_bPulsed;
 	float		m_flFullDamage;
-	float		m_flFuseDuration;
 
 	CNetworkHandle( CBaseEntity, m_hLauncher );
 
@@ -65,7 +64,7 @@ public:
 
 	// Creation.
 	static CTFGrenadePipebombProjectile *Create( const Vector &position, const QAngle &angles, const Vector &velocity, 
-		                                         const AngularImpulse &angVelocity, CBaseCombatCharacter *pOwner, const CTFWeaponInfo &weaponInfo, bool bRemoteDetonate );
+		                                         const AngularImpulse &angVelocity, CBaseCombatCharacter *pOwner, const CTFWeaponInfo &weaponInfo, bool bRemoteDetonate, bool hasSpread );
 
 	// Overrides.
 	virtual void	Spawn();

@@ -70,7 +70,6 @@ void CTFWeaponInfo::Parse( KeyValues *pKeyValuesData, const char *szWeaponName )
 	m_WeaponData[TF_WEAPON_PRIMARY_MODE].m_nBulletsPerShot		= pKeyValuesData->GetInt( "BulletsPerShot", 0 );
 	m_WeaponData[TF_WEAPON_PRIMARY_MODE].m_flSpread				= pKeyValuesData->GetFloat( "Spread", 0.0f );
 	m_WeaponData[TF_WEAPON_PRIMARY_MODE].m_flPunchAngle			= pKeyValuesData->GetFloat( "PunchAngle", 0.0f );
-	m_WeaponData[TF_WEAPON_PRIMARY_MODE].m_flPunchAngleHorizontal			= pKeyValuesData->GetFloat( "PunchAngleHorizontal", 0.0f );
 	m_WeaponData[TF_WEAPON_PRIMARY_MODE].m_flTimeFireDelay		= pKeyValuesData->GetFloat( "TimeFireDelay", 0.0f );
 	m_WeaponData[TF_WEAPON_PRIMARY_MODE].m_flTimeIdle			= pKeyValuesData->GetFloat( "TimeIdle", 0.0f );
 	m_WeaponData[TF_WEAPON_PRIMARY_MODE].m_flTimeIdleEmpty		= pKeyValuesData->GetFloat( "TimeIdleEmpy", 0.0f );
@@ -81,7 +80,6 @@ void CTFWeaponInfo::Parse( KeyValues *pKeyValuesData, const char *szWeaponName )
 	m_WeaponData[TF_WEAPON_PRIMARY_MODE].m_bUseRapidFireCrits = (pKeyValuesData->GetInt("UseRapidFireCrits", 0) != 0);
 	m_WeaponData[TF_WEAPON_PRIMARY_MODE].m_iDeploySpeed = pKeyValuesData->GetFloat("DeploySpeed", 0);
 	m_WeaponData[TF_WEAPON_PRIMARY_MODE].m_iHolsterSpeed = pKeyValuesData->GetFloat("HolsterSpeed", 0);
-	m_WeaponData[TF_WEAPON_PRIMARY_MODE].m_flFuseTime = pKeyValuesData->GetFloat("FuseTime", 0);
 
 	m_WeaponData[TF_WEAPON_PRIMARY_MODE].m_iProjectile = TF_PROJECTILE_NONE;
 	const char *pszProjectileType = pKeyValuesData->GetString( "ProjectileType", "projectile_none" );
@@ -95,8 +93,7 @@ void CTFWeaponInfo::Parse( KeyValues *pKeyValuesData, const char *szWeaponName )
 		}
 	}	 
 
-	m_WeaponData[TF_WEAPON_PRIMARY_MODE].m_flProjectileSpeed = pKeyValuesData->GetFloat("ProjectileSpeed", 0.0f);
-	m_WeaponData[TF_WEAPON_SECONDARY_MODE].m_flProjectileSpeed = pKeyValuesData->GetFloat("ProjectileSpeed", m_WeaponData[TF_WEAPON_PRIMARY_MODE].m_flProjectileSpeed);
+	m_WeaponData[TF_WEAPON_PRIMARY_MODE].m_flProjectileSpeed	= pKeyValuesData->GetFloat( "ProjectileSpeed", 0.0f );
 
 	m_WeaponData[TF_WEAPON_PRIMARY_MODE].m_flSmackDelay			= pKeyValuesData->GetFloat( "SmackDelay", 0.2f );
 	m_WeaponData[TF_WEAPON_SECONDARY_MODE].m_flSmackDelay		= pKeyValuesData->GetFloat( "Secondary_SmackDelay", 0.2f );
@@ -115,7 +112,6 @@ void CTFWeaponInfo::Parse( KeyValues *pKeyValuesData, const char *szWeaponName )
 	m_WeaponData[TF_WEAPON_SECONDARY_MODE].m_nBulletsPerShot	= pKeyValuesData->GetInt( "Secondary_BulletsPerShot", m_WeaponData[TF_WEAPON_PRIMARY_MODE].m_nBulletsPerShot );
 	m_WeaponData[TF_WEAPON_SECONDARY_MODE].m_flSpread			= pKeyValuesData->GetFloat( "Secondary_Spread", m_WeaponData[TF_WEAPON_PRIMARY_MODE].m_flSpread );
 	m_WeaponData[TF_WEAPON_SECONDARY_MODE].m_flPunchAngle		= pKeyValuesData->GetFloat( "Secondary_PunchAngle", m_WeaponData[TF_WEAPON_PRIMARY_MODE].m_flPunchAngle );
-	m_WeaponData[TF_WEAPON_SECONDARY_MODE].m_flPunchAngleHorizontal		= pKeyValuesData->GetFloat( "Secondary_PunchAngleHorizontal", m_WeaponData[TF_WEAPON_PRIMARY_MODE].m_flPunchAngleHorizontal );
 	m_WeaponData[TF_WEAPON_SECONDARY_MODE].m_flTimeFireDelay	= pKeyValuesData->GetFloat( "Secondary_TimeFireDelay", m_WeaponData[TF_WEAPON_PRIMARY_MODE].m_flTimeFireDelay );
 	m_WeaponData[TF_WEAPON_SECONDARY_MODE].m_flTimeIdle			= pKeyValuesData->GetFloat( "Secondary_TimeIdle", m_WeaponData[TF_WEAPON_PRIMARY_MODE].m_flTimeIdle );
 	m_WeaponData[TF_WEAPON_SECONDARY_MODE].m_flTimeIdleEmpty	= pKeyValuesData->GetFloat( "Secondary_TimeIdleEmpy", m_WeaponData[TF_WEAPON_PRIMARY_MODE].m_flTimeIdleEmpty );
@@ -126,7 +122,6 @@ void CTFWeaponInfo::Parse( KeyValues *pKeyValuesData, const char *szWeaponName )
 	m_WeaponData[TF_WEAPON_SECONDARY_MODE].m_bUseRapidFireCrits = (pKeyValuesData->GetInt("Secondary_UseRapidFireCrits", 0) != 0);
 	m_WeaponData[TF_WEAPON_SECONDARY_MODE].m_iDeploySpeed = pKeyValuesData->GetFloat("DeploySpeed", 0);
 	m_WeaponData[TF_WEAPON_SECONDARY_MODE].m_iHolsterSpeed = pKeyValuesData->GetFloat("HolsterSpeed", 0);
-	m_WeaponData[TF_WEAPON_SECONDARY_MODE].m_flFuseTime = pKeyValuesData->GetFloat("FuseTime", 0);
 
 	m_WeaponData[TF_WEAPON_SECONDARY_MODE].m_iProjectile = m_WeaponData[TF_WEAPON_PRIMARY_MODE].m_iProjectile;
 	pszProjectileType = pKeyValuesData->GetString( "Secondary_ProjectileType", "projectile_none" );
