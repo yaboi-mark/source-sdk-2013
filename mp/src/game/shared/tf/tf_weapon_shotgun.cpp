@@ -82,15 +82,3 @@ void CTFShotgun::PrimaryAttack()
 	BaseClass::PrimaryAttack();
 }
 
-//-----------------------------------------------------------------------------
-// Purpose: 
-//-----------------------------------------------------------------------------
-void CTFShotgun::UpdatePunchAngles( CTFPlayer *pPlayer )
-{
-	// Update the player's punch angle.
-	QAngle angle = pPlayer->GetPunchAngle();
-	float flPunchAngle = m_pWeaponInfo->GetWeaponData( m_iWeaponMode ).m_flPunchAngle;
-	angle.x -= SharedRandomInt( "ShotgunPunchAngle", ( flPunchAngle - 1 ), ( flPunchAngle + 1 ) );
-	pPlayer->SetPunchAngle( angle );
-}
-

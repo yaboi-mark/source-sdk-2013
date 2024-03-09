@@ -76,6 +76,7 @@ PRECACHE_WEAPON_REGISTER( tf_weapon_pistol_scout );
 CTFPistol::CTFPistol( void )
 {
 	m_flSoonestPrimaryAttack = gpGlobals->curtime;
+	m_bNotFiringLastFrame = false;
 }
 
 //-----------------------------------------------------------------------------
@@ -93,10 +94,7 @@ void CTFPistol::ItemPostFrame( void )
 		return;
 
 	//Allow a refire as fast as the player can click
-	if ( ( ( pOwner->m_nButtons & IN_ATTACK ) == false ) && ( m_flSoonestPrimaryAttack < gpGlobals->curtime ) )
-	{
-		m_flNextPrimaryAttack = gpGlobals->curtime - 0.1f;
-	}
+	m_bNotFiringLastFrame = ( ( pOwner->m_nButtons & IN_ATTACK2 ) == false );
 }
 
 //-----------------------------------------------------------------------------
@@ -122,4 +120,11 @@ void CTFPistol::PrimaryAttack( void )
 		return;
 
 	BaseClass::PrimaryAttack();
+}
+
+void CTFPistol::SecondaryAttack(void) {
+	if ( m_bNotFiringLastFrame ) {
+		BaseClass::SecondaryAttack();
+		m_bNotFiringLastFrame = true;
+	}
 }

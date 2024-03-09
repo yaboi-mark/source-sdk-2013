@@ -2340,10 +2340,9 @@ const QAngle& C_BasePlayer::GetPunchAngle()
 	return m_Local.m_vecPunchAngle.Get();
 }
 
-
 void C_BasePlayer::SetPunchAngle( const QAngle &angle )
 {
-	m_Local.m_vecPunchAngle = angle;
+	m_Local.m_vecPunchAngle += angle;
 }
 
 

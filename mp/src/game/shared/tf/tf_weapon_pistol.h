@@ -18,11 +18,11 @@
 
 // We allow the pistol to fire as fast as the player can click.
 // This is the minimum time between shots.
-#define	PISTOL_FASTEST_REFIRE_TIME		0.1f
+#define	PISTOL_FASTEST_REFIRE_TIME		0.12f
 
 // The faster the player fires, the more inaccurate he becomes
-#define	PISTOL_ACCURACY_SHOT_PENALTY_TIME		0.2f	// Applied amount of time each shot adds to the time we must recover from
-#define	PISTOL_ACCURACY_MAXIMUM_PENALTY_TIME	1.5f	// Maximum time penalty we'll allow
+#define	PISTOL_ACCURACY_SHOT_PENALTY_TIME		0f	// Applied amount of time each shot adds to the time we must recover from
+#define	PISTOL_ACCURACY_MAXIMUM_PENALTY_TIME	0f	// Maximum time penalty we'll allow
 
 //=============================================================================
 //
@@ -45,10 +45,13 @@ public:
 	~CTFPistol() {}
 
 	virtual void	ItemPostFrame( void );
-	virtual void	PrimaryAttack( void );
+	virtual void	PrimaryAttack(void);
+	virtual void	SecondaryAttack(void);
 
 	virtual int		GetWeaponID( void ) const			{ return TF_WEAPON_PISTOL; }
-	CNetworkVar( float,	m_flSoonestPrimaryAttack );
+	CNetworkVar(float, m_flSoonestPrimaryAttack);
+
+	bool			m_bNotFiringLastFrame;
 
 private:
 	CTFPistol( const CTFPistol & ) {}
@@ -63,6 +66,7 @@ public:
 	DECLARE_PREDICTABLE();
 
 	virtual int		GetWeaponID( void ) const			{ return TF_WEAPON_PISTOL_SCOUT; }
+
 };
 
 #endif // TF_WEAPON_PISTOL_H

@@ -25,6 +25,7 @@ struct WeaponData_t
 	float	m_flRange;
 	float	m_flSpread;
 	float	m_flPunchAngle;
+	float	m_flPunchAngleHorizontal;
 	float	m_flTimeFireDelay;				// Time to delay between firing
 	float	m_flTimeIdle;					// Time to idle after firing
 	float	m_flTimeIdleEmpty;				// Time to idle after firing last bullet in clip
@@ -38,6 +39,7 @@ struct WeaponData_t
 	bool	m_bUseRapidFireCrits;
 	float	m_iDeploySpeed;					// deploy speed of weapon. suggested 0.
 	float	m_iHolsterSpeed;					// deploy speed of weapon. suggested 0.
+	float	m_flFuseTime;					// fuse time of grenades shot by this weapon.
 
 	void Init( void )
 	{
@@ -46,6 +48,7 @@ struct WeaponData_t
 		m_flRange = 0.0f;
 		m_flSpread = 0.0f;
 		m_flPunchAngle = 0.0f;
+		m_flPunchAngleHorizontal = 0.0f;
 		m_flTimeFireDelay = 0.0f;
 		m_flTimeIdle = 0.0f;
 		m_flTimeIdleEmpty = 0.0f;
@@ -58,6 +61,7 @@ struct WeaponData_t
 		m_bUseRapidFireCrits = false;
 		m_iDeploySpeed = 0;
 		m_iHolsterSpeed = 0;
+		m_flFuseTime = 0;
 	};
 };
 

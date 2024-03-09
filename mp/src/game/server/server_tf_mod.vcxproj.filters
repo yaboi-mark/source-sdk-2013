@@ -1805,6 +1805,9 @@
     <ClInclude Include="tf_weapon_british_grenade.h">
       <Filter>Source Files\TF\Weapon</Filter>
     </ClInclude>
+    <ClInclude Include="..\client\tf_weapon_garand.h">
+      <Filter>Source Files\TF\Weapon</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="gamedll_replay.cpp">
@@ -3359,6 +3362,9 @@
       <Filter>Source Files\TF\Weapon</Filter>
     </ClCompile>
     <ClCompile Include="tf_weapon_british_grenade.cpp">
+      <Filter>Source Files\TF\Weapon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\client\tf_weapon_garand.cpp">
       <Filter>Source Files\TF\Weapon</Filter>
     </ClCompile>
   </ItemGroup>

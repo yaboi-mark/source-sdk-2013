@@ -1421,7 +1421,7 @@ void CBasePlayer::ViewPunch( const QAngle &angleOffset )
 //-----------------------------------------------------------------------------
 void CBasePlayer::ViewPunchReset( float tolerance )
 {
-	if ( tolerance != 0 )
+	/*if ( tolerance != 0 )
 	{
 		tolerance *= tolerance;	// square
 		float check = m_Local.m_vecPunchAngleVel->LengthSqr() + m_Local.m_vecPunchAngle->LengthSqr();
@@ -1429,7 +1429,7 @@ void CBasePlayer::ViewPunchReset( float tolerance )
 			return;
 	}
 	m_Local.m_vecPunchAngle = vec3_angle;
-	m_Local.m_vecPunchAngleVel = vec3_angle;
+	m_Local.m_vecPunchAngleVel = vec3_angle;*/
 }
 
 #if defined( CLIENT_DLL )
