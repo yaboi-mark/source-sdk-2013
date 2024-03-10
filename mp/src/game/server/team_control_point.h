@@ -97,7 +97,7 @@ public:
 	void		CaptureStart( void );
 	void		CaptureInterrupted( bool bBlocked );
 
-	virtual void StopLoopingSounds( void );
+	virtual void StopLoopingSounds(void);
 
 private:
 	void		SendCapString( int iCapTeam, int iNumCappers, int *pCappingPlayers );
