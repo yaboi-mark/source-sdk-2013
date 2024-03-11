@@ -2156,18 +2156,6 @@
     <ClInclude Include="toolframework_client.h">
       <Filter>Tool Framework</Filter>
     </ClInclude>
-    <ClInclude Include="tf_weapon_spaz.h">
-      <Filter>Source Files\TF\Weapon</Filter>
-    </ClInclude>
-    <ClInclude Include="tf_weapon_doublebarrel.h">
-      <Filter>Source Files\TF\Weapon</Filter>
-    </ClInclude>
-    <ClInclude Include="..\server\tf_weapon_british_grenade.h">
-      <Filter>Source Files\TF\Weapon</Filter>
-    </ClInclude>
-    <ClInclude Include="tf_weapon_garand.h">
-      <Filter>Source Files\TF\Weapon</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="mp3player.cpp">
@@ -3873,21 +3861,6 @@
     </ClCompile>
     <ClCompile Include="toolframework_client.cpp">
       <Filter>Tool Framework</Filter>
-    </ClCompile>
-    <ClCompile Include="tf_weapon_spaz.cpp">
-      <Filter>Source Files\TF\Weapon</Filter>
-    </ClCompile>
-    <ClCompile Include="tf\tf_hud_damageaccount_panel.cpp">
-      <Filter>Source Files\TF</Filter>
-    </ClCompile>
-    <ClCompile Include="tf_weapon_doublebarrel.cpp">
-      <Filter>Source Files\TF\Weapon</Filter>
-    </ClCompile>
-    <ClCompile Include="..\server\tf_weapon_british_grenade.cpp">
-      <Filter>Source Files\TF\Weapon</Filter>
-    </ClCompile>
-    <ClCompile Include="tf_weapon_garand.cpp">
-      <Filter>Source Files\TF\Weapon</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
